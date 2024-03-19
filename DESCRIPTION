@@ -1,6 +1,6 @@
 Package: netABM
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Simple, Easy, and Flexible Agent-based Modeling for Networks
 Version: 0.0.1
 Author: Keiichi Satoh
 Maintainer: Keiichi Satoh <keiichi.satoh@r.hit-u.ac.jp>
