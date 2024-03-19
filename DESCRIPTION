@@ -2,7 +2,7 @@ Package: netABM
 Title: What the Package Does (One Line, Title Case)
 Version: 0.0.0.9000
 Authors@R: c(
-    person("Keiichi", "Satoh", , "keiichi.satoh@r.hit-u.ac.jp", role = "cre"),
+    person("Keiichi", "Satoh", "keiichi.satoh@r.hit-u.ac.jp", role = "cre"),
     person("Hao", "Liang", role = "ctb")
   )
 Description: What the package does (one paragraph).
