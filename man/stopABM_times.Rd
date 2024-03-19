@@ -2,7 +2,7 @@
 % Please edit documentation in R/stop_simTimes.R
 \name{stopABM_times}
 \alias{stopABM_times}
-\title{Stop the ABM Simulation by Runtime}
+\title{Stop ABM Simulation by Runtime}
 \usage{
 stopABM_times(D, simTimes = 1)
 }
@@ -12,10 +12,10 @@ stopABM_times(D, simTimes = 1)
 \item{simTimes}{Number of run (Default: 1)}
 }
 \value{
-TRUE (when run-time reaches the specified time)
+TRUE (if the simulation has run for the defined number of times specified by simTimes)
 }
 \description{
-\code{stopABM_times} returns TRUE when the ABM simulation runs after the defined time.
+\code{stopABM_times} returns TRUE when the ABM simulation continues after the defined time.
 }
 \examples{
 # This function is supposed to be used in tandem with runABM family function.
