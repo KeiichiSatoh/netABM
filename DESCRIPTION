@@ -1,13 +1,13 @@
 Package: netABM
-Title: What the Package Does (One Line, Title Case)
-Version: 0.0.0.9000
+Title: Simple, Easy, and Flexible Network Agent-based Modeling
+Version: 0.0.1
 Authors@R: c(
-    person("Keiichi", "Satoh", "keiichi.satoh@r.hit-u.ac.jp", role = "cre"),
-    person("Hao", "Liang", role = "ctb")
-  )
-Description: What the package does (one paragraph).
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+    person("Keiichi", "Satoh", , "keiichi.satoh@r.hit-u.ac.jp", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0003-3316-301X")),
+    person("Hao", "Liang", , "hl893@cornell.edu", role = "ctb"))
+Description: A set of utility functions for conducting a Sociological analysis, especially for exploratory analysis. This includes tools for descriptive statistics, clustering, and social network analysis.
+License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
+LazyData: true
