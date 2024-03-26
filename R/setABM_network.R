@@ -1,17 +1,23 @@
 #' @title Setting netABM_network Objects
 #' @description
 #' \code{setABM_network} constructs a \code{netABM_network} object for running ABM.
-#' @param n Number of agents
+#' @param n integer. Number of agents
 #' @param node_attr vector/data.frame/list of attributes of agents (default: \code{NULL})
 #' @param networks Single n times n matrix or dataframe, or list of multiple matrices. The default value \code{NULL} will result in creating a n times n matrix without any edges.
-#' @param .act A user-defined or built-in function object representing agent's actions or list of functions for each agent. The default value \code{NULL} will result in setting \code{actAgent_nothing} to all agents.
+#' @param .act list that contains user-defined or built-in function object representing agent's actions.
+#' If user supplies only one action, it will then copied to all actors; Otherwise, user can also supply different actions for each agent.
+#' Be sure to supply .act encapseled with list, even when user supplies only one agent action.
+#'
 #' @details
 #' \code{setAgent_network} is a constructor of \code{netABM_network} object (D)
 #' which has \code{agents}, \code{time}(set as 1), and \code{log} (set as NA) as a list format.
-#' \code{agents} contains each agent's attribute, networks, and actions as a \code{R6} class object from package \code{R6}.
+#' \code{agents} contains each agent's attribute listed under \code{a} (i.e. "attributes"),
+#' networks listed under \code{e} (i.e. "edges"), and actions as \code{.act}.
+#' The each agent under \code{agents} is \code{R6} class object from package \code{R6}.
+#' Object \code{D} also has a class \code{netABM} which is the parent class of \code{netABM_network}.
 #'
 #' Each agent automatically get its \code{ID} and \code{act_label} and store them as their attributes.
-#' The latter \code{act_label} is put from the supplied object name of \code{.act}.
+#' The latter \code{act_label} is taken from the supplied object name of \code{.act}.
 #'
 #' There are two ways to set \code{.act}.
 #' The first way is to write the user's own function of agent's actions.
@@ -20,11 +26,17 @@
 #' \code{self} is a reserved for indicating the agent themselves.
 #'
 #' The second way of setting \code{.act} is to use a built-in function of this package.
-#'  If user wants to modify some argument, supply it as a form: \code{function_name(x = a new value)}.
+#' This second way actually has further three variations. First, the easiest one,
+#' just supply the function object to \code{.act} (e.g., .act = function_name).
+#' Second, if user wants to modify some argument, supply it as a form: \code{function_name(x = a new value)}.
+#' Third, if user wants to put another name to this modified function object, assign it with substitute().
+#' Then supply this substituted object to \code{.act}. The last method may be useful when the modification
+#' of the function is very long. For getting the ideas more concretely about how to supply a function to \code{.act},
+#' see the examples below.
 #'
 #' For now, \code{setABM_network} only supports directed networks.
 #'
-#' @returns  a D object (see Details)
+#' @returns  a \code{netABM_network} class object D (see Details)
 #' @family setABM
 #' @author Keiichi Satoh
 #' @importFrom R6 R6Class
@@ -37,17 +49,34 @@
 #' age = c(0, 1, 2, 3, 4),
 #' sex = c("m","m","m","f","f"))
 #' network <- matrix(1, 5, 5)
-#' agent_get_older <- function(D, b = 1){self$age <- b*self$age + 1}
+#' agent_get_older <- function(D){self$age <- self$age + 1}
 #'
+#' # Example 1
 #' D <- setABM_network(n = 5,
 #'                    node_attr = node_attr,
 #'                    networks = network,
-#'                    .act = agent_get_older)
+#'                    .act = list(agent_get_older))
+#'
+#'# Example 2: Set .act supplied directly with an modified built-in function.
+#' D <- setABM_network(
+#'   n = 5,
+#'   .act = list(actAgent_addEdges_random(.valueFunction = rnorm(n = 1, mean = 0, sd = 1))))
+#'
+#' # Example 3: Set .act via a substituted object.
+#' random2 <- substitute(actAgent_addEdges_random(.valueFunction = rnorm(n = 1, mean = 0, sd = 1)))
+#'
+#' D <- setABM_network(
+#'   n = 5,
+#'   .act = list(actAgent_addEdges_random(.valueFunction = rnorm(n = 1, mean = 0, sd = 1))))
+#'
+
+
+
 
 setABM_network <- function(
     n,
     node_attr = NULL,
-    .act = NULL,
+    .act = list(NULL),
     networks = NULL){
   # インプットの形態を確認する------------
   ## n: 数値データであることを確認
@@ -69,7 +98,7 @@ setABM_network <- function(
   ### Nullの場合
   if(is.null(networks)){
     networks <- list(matrix(0, n, n))
-    names(networks) <- "network"
+    names(networks) <- "net"
   }else if(is.data.frame(networks)){
     object_name_networks <- as.character(substitute(networks))
     networks <- list(as.matrix(networks))
@@ -88,33 +117,57 @@ setABM_network <- function(
   }
 
   ## .act:
-  ### いったんひとまず人数分コピーする
-  if(is.null(.act)){
-    act_label <- rep("actAgent_nothing", n)
-  }else if(length(deparse(substitute(.act)))==1){
-    # .actの名前を取得
-    act_label <- rep(deparse(substitute(.act)), n)
+  #### .actの要素の数ごとに：人数分コピーする
+  temp_label <- as.character(substitute(.act))[-1]
+  if(length(temp_label)==0){
+    act_label <- rep("NULL", n)
+  }else if(length(temp_label)==1){
+    act_label <- rep(temp_label, n)
   }else{
-    act_label <- as.character(substitute(.act))[-1]
-    stopifnot("The length of .act should be n." = length(act_label)==n)
+    stopifnot("The number of actions within a list should correspond to the number of agents." = length(temp_label)==n)
+    act_label <- temp_label
   }
+
   ### 各agentごとにfunctionが存在しない場合にfunctionに変更処理
   .act_list <- vector("list", n)
   for(i in 1:n){
+    # NULL/NAの場合
     if(act_label[i] %in% c("NA", "NULL")){
       .act_list[[i]] <- actAgent_nothing
     }else if(exists(act_label[i])){
-      .act_list[[i]] <- get(act_label[i])
+      # Objectは存在している場合
+      retrieved_object <- get(act_label[i])
+      # 取得されたのがfunctionの場合
+      if(is.function(retrieved_object)){
+        .act_list[[i]] <- retrieved_object
+      }else if(is.call(retrieved_object)){
+        # 取得されたのがcallの場合
+        func_name <- rlang::call_name(retrieved_object)
+        func_args <- rlang::call_args(retrieved_object)
+        assign("temp_func", get(func_name))
+        # 元の関数のデフォルト値を新しい値に置き換える
+        if(length(func_args) > 0){
+          for(k in 1:length(func_args)){
+            formals(temp_func)[names(func_args[k])] <- func_args[k]
+          }
+        }
+        # 新しい関数を貼り付ける
+        .act_list[[i]] <- temp_func
+      }else{
+        .act_list[[i]] <- get(act_label[i])
+        warnings("The content with in .act list seems to be not function. Please check.")
+      }
     }else{
+      # objectが存在しない場合
       # 文字列から元の関数名と指定されているargを取り出す
       parsed_expr <- rlang::parse_expr(act_label[i])
-      call_name <- rlang::call_name(parsed_expr)
-      call_args <- rlang::call_args(parsed_expr)
-      assign("temp_func", get(call_name))
+      func_name <- rlang::call_name(parsed_expr)
+      func_args <- rlang::call_args(parsed_expr)
+      assign("temp_func", get(func_name))
       # 元の関数のデフォルト値を新しい値に置き換える
-      if(length(call_args)>0){
-        for(k in 1:length(call_args)){
-          formals(temp_func)[names(call_args[k])] <- call_args[k]
+      if(length(func_args)>0){
+        for(k in 1:length(func_args)){
+          formals(temp_func)[names(func_args[k])] <- func_args[k]
         }
       }
       # 新しい関数を貼り付ける
@@ -138,6 +191,10 @@ setABM_network <- function(
   # Agentのクラス（network_Agent)を作成する--------------
   ## ID
   node_ID <- paste0("ID", 1:n)
+  ## node_attrに"ID"という名前の列がある場合には、"ID_user"と変更する
+  if(any(colnames(node_attr)=="ID")){
+    colnames(node_attr)[which(colnames(node_attr)=="ID")] <- "ID_user"
+  }
 
   ## IDをnetworkに振る
   for(m in 1:length(networks)){
@@ -145,32 +202,36 @@ setABM_network <- function(
   }
 
   ## fieldを作成
-  if(is.null(node_attr)){
-    num_fields <- length(networks) + 2                      # IDとact_label分を足す
-  }else{
-    num_fields <- ncol(node_attr) + length(networks) + 2    # IDとact_label分を足す
-  }
-  node_fields <- vector(mode = "list", length = num_fields)
-  names(node_fields) <- c("ID", names(node_attr), "act_label", names(networks))
+    ### 各フィールドの数をカウントする
+    num_attr <- length(colnames(node_attr)) + 2            # IDとact_label分を足す
+    num_networks <- length(networks)
+
+    ### attribute, networkごとにフィールドを作成
+    field_attr <- vector("list", length = num_attr)
+    names(field_attr) <- c("ID", names(node_attr), "act_label")
+    field_networks <- vector("list", length = num_networks)
+    names(field_networks) <- names(networks)
 
   ## network_Agentクラスを作る
   network_Agent <- R6::R6Class(
     "network_Agent",
-    public = c(node_fields, .act = NA,
+    public = c(a = list(field_attr),
+               e = list(field_networks),
+               .act = NA,
                print = function(...){
                  # attributes(ある場合)
                  if(!is.null(node_attr)){
                    for(m in 1:ncol(node_attr)){
-                     cat(colnames(node_attr)[m],": ", self[[colnames(node_attr)[m]]], "\n", sep = "")
+                     cat(colnames(node_attr)[m],": ", self$a[[colnames(node_attr)[m]]], "\n", sep = "")
                    }
                  }
                  # network
                  for(m in 1:length(networks)){
-                   net_temp <- paste0(names(self[[names(networks)[m]]]), sep = " ")
+                   net_temp <- paste0(names(self$e[[names(networks)[m]]]), sep = " ")
                    cat(names(networks)[m], ": ", net_temp, "\n", sep = "")
                  }
                  # act_label
-                 cat("act_label: ", self$act_label, "\n", sep = "")
+                 cat("act_label: ", self$a$act_label, "\n", sep = "")
                }),
     lock_objects = F, cloneable = T)
 
@@ -179,7 +240,6 @@ setABM_network <- function(
   D$agents <- vector(mode = "list", n)
   names(D$agents) <- node_ID
 
-
   ## Agentを新たにインスタンス化する
   for(i in 1:n){
     D$agents[[i]] <- network_Agent$new()
@@ -187,18 +247,16 @@ setABM_network <- function(
 
   ## 当該agentのメタ情報を付与する
   for(i in 1:n){
-    D$agents[[i]][["ID"]] <- node_ID[i]
-    D$agents[[i]][["act_label"]] <- act_label[i]
+    D$agents[[i]]$a["ID"] <- node_ID[i]
+    D$agents[[i]]$a["act_label"] <- act_label[i]
   }
 
-  ## 当該agentの.actを貼り付ける(個別のアクターごとにNULLの可能性あり)
+  ## 当該agentの.actを貼り付ける
   for(i in 1:n){
-    if(!is.null(.act_list[[i]])){
-      # .act_listがNULLでない場合のみ
-      D$agents[[i]][[".act"]] <- .act_list[[i]]
-      environment(D$agents[[i]][[".act"]]) <- D$agents[[i]]$.__enclos_env__
-    }
+    D$agents[[i]][[".act"]] <- .act_list[[i]]
+    environment(D$agents[[i]][[".act"]]) <- D$agents[[i]]$.__enclos_env__
   }
+
 
   ## 当該agentのネットワークを貼り付ける
   for(i in 1:n){
@@ -206,11 +264,9 @@ setABM_network <- function(
       ego_net <- networks[[p]][i, ]
       ego_net_active <- ego_net[ego_net != 0]
       # すべて0の場合
-      if(rlang::is_empty(ego_net_active)){
-        D$agents[[i]][[names(networks)[p]]] <- NULL
-      }else{
+      if(rlang::is_empty(ego_net_active)==F){
         # なんらかのつながりを持つ場合
-        D$agents[[i]][[names(networks)[p]]] <- networks[[p]][i, ]
+        D$agents[[i]]$e[[names(networks)[p]]] <- ego_net_active
       }
     }
   }
@@ -219,33 +275,17 @@ setABM_network <- function(
   if(!is.null(node_attr)){
     for(i in 1:n){
       for(m in 1:ncol(node_attr)){
-        D$agents[[i]][[colnames(node_attr)[m]]] <- node_attr[i,m]
+        D$agents[[i]]$a[colnames(node_attr)[m]] <- node_attr[i,m]
       }
     }
   }
 
   # DATAオブジェクトを返す---------------------
-  ## variable nameをつける
-  if(is.null(node_attr)){
-    variable_type <- c(rep("network", length(networks)),
-                       "ID",
-                       "act_label")
-  }else{
-    variable_type <- c(rep("node_attr", ncol(node_attr)),
-                       rep("network", length(networks)),
-                       "ID",
-                       "act_label")
-  }
-  names(variable_type) <- c(colnames(node_attr),
-                            names(networks),
-                            "ID", "act_label")
-  attr(D$agents, "variable_type") <- variable_type
-
   ## Time, logをつける
   D$time <- 1
   D$log  <- NA
   ## class名を付与する
-  attr(D, "class") <- "ABM_network"
+  class(D) <- c("netABM", "netABM_network")
 
   ## DATAを返却
   D

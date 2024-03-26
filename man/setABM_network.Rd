@@ -4,19 +4,21 @@
 \alias{setABM_network}
 \title{Setting netABM_network Objects}
 \usage{
-setABM_network(n, node_attr = NULL, .act = NULL, networks = NULL)
+setABM_network(n, node_attr = NULL, .act = list(NULL), networks = NULL)
 }
 \arguments{
-\item{n}{Number of agents}
+\item{n}{integer. Number of agents}
 
 \item{node_attr}{vector/data.frame/list of attributes of agents (default: \code{NULL})}
 
-\item{.act}{A user-defined or built-in function object representing agent's actions or list of functions for each agent. The default value \code{NULL} will result in setting \code{actAgent_nothing} to all agents.}
+\item{.act}{list that contains user-defined or built-in function object representing agent's actions.
+If user supplies only one action, it will then copied to all actors; Otherwise, user can also supply different actions for each agent.
+Be sure to supply .act encapseled with list, even when user supplies only one agent action.}
 
 \item{networks}{Single n times n matrix or dataframe, or list of multiple matrices. The default value \code{NULL} will result in creating a n times n matrix without any edges.}
 }
 \value{
-a D object (see Details)
+a \code{netABM_network} class object D (see Details)
 }
 \description{
 \code{setABM_network} constructs a \code{netABM_network} object for running ABM.
@@ -24,10 +26,13 @@ a D object (see Details)
 \details{
 \code{setAgent_network} is a constructor of \code{netABM_network} object (D)
 which has \code{agents}, \code{time}(set as 1), and \code{log} (set as NA) as a list format.
-\code{agents} contains each agent's attribute, networks, and actions as a \code{R6} class object from package \code{R6}.
+\code{agents} contains each agent's attribute listed under \code{a} (i.e. "attributes"),
+networks listed under \code{e} (i.e. "edges"), and actions as \code{.act}.
+The each agent under \code{agents} is \code{R6} class object from package \code{R6}.
+Object \code{D} also has a class \code{netABM} which is the parent class of \code{netABM_network}.
 
 Each agent automatically get its \code{ID} and \code{act_label} and store them as their attributes.
-The latter \code{act_label} is put from the supplied object name of \code{.act}.
+The latter \code{act_label} is taken from the supplied object name of \code{.act}.
 
 There are two ways to set \code{.act}.
 The first way is to write the user's own function of agent's actions.
@@ -36,7 +41,13 @@ otherwise agent's action does not reflect dynamically to the changing \code{D} o
 \code{self} is a reserved for indicating the agent themselves.
 
 The second way of setting \code{.act} is to use a built-in function of this package.
-If user wants to modify some argument, supply it as a form: \code{function_name(x = a new value)}.
+This second way actually has further three variations. First, the easiest one,
+just supply the function object to \code{.act} (e.g., .act = function_name).
+Second, if user wants to modify some argument, supply it as a form: \code{function_name(x = a new value)}.
+Third, if user wants to put another name to this modified function object, assign it with substitute().
+Then supply this substituted object to \code{.act}. The last method may be useful when the modification
+of the function is very long. For getting the ideas more concretely about how to supply a function to \code{.act},
+see the examples below.
 
 For now, \code{setABM_network} only supports directed networks.
 }
@@ -45,12 +56,26 @@ node_attr <- data.frame(
 age = c(0, 1, 2, 3, 4),
 sex = c("m","m","m","f","f"))
 network <- matrix(1, 5, 5)
-agent_get_older <- function(D, b = 1){self$age <- b*self$age + 1}
+agent_get_older <- function(D){self$age <- self$age + 1}
 
+# Example 1
 D <- setABM_network(n = 5,
                    node_attr = node_attr,
                    networks = network,
-                   .act = agent_get_older)
+                   .act = list(agent_get_older))
+
+# Example 2: Set .act supplied directly with an modified built-in function.
+D <- setABM_network(
+  n = 5,
+  .act = list(actAgent_addEdges_random(.valueFunction = rnorm(n = 1, mean = 0, sd = 1))))
+
+# Example 3: Set .act via a substituted object.
+random2 <- substitute(actAgent_addEdges_random(.valueFunction = rnorm(n = 1, mean = 0, sd = 1)))
+
+D <- setABM_network(
+  n = 5,
+  .act = list(actAgent_addEdges_random(.valueFunction = rnorm(n = 1, mean = 0, sd = 1))))
+
 }
 \author{
 Keiichi Satoh

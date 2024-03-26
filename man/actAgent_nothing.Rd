@@ -25,6 +25,10 @@ The primary purpose of this function is to assign a non-action state to certain 
 setABM_network(n = 5,
                .act = actAgent_nothing)
 }
+\seealso{
+Other actAgent: 
+\code{\link{actAgent_addEdges_random}()}
+}
 \author{
 Keiichi Satoh
 }
