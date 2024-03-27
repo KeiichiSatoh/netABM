@@ -39,20 +39,16 @@ otherwise agent's action does not reflect dynamically to the changing \code{D} o
 \code{self} is a reserved for indicating the agent themselves.
 
 The second way is to use a built-in function of this package.
-This second way actually has further three variations. First, the easiest one,
+This second way actually has further two variations. First, the easiest one,
 just supply the function object to \code{.stopCondition} and \code{.selectAgent} (e.g., .act = function_name).
 Second, if user wants to modify some argument, supply it as a form: \code{function_name(x = a new value)}.
-Third, if user wants to put another name to this modified function object, assign it with substitute().
-Then supply this substituted object. The last method may be useful when the modification
-of the function is very long. For getting the ideas more concretely about how to supply a function,
-see the examples below.
 }
 \examples{
 node_attr <- data.frame(
  age = c(0, 0, 0, 0, 0),
  sex = c("m","m","m","f","f"))
 network <- matrix(0, 5, 5)
-agent_get_older <- function(D =  NULL){self$a$age <- self$a$age + 1}
+agent_get_older <- function(D){self$a$age <- self$a$age + 1}
 
 # Create the netABM_network object
 D <- setABM_network(n = 5,

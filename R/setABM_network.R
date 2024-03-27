@@ -4,9 +4,8 @@
 #' @param n integer. Number of agents
 #' @param node_attr vector/data.frame/list of attributes of agents (default: \code{NULL})
 #' @param networks Single n times n matrix or dataframe, or list of multiple matrices. The default value \code{NULL} will result in creating a n times n matrix without any edges.
-#' @param .act list that contains user-defined or built-in function object representing agent's actions.
-#' If user supplies only one action, it will then copied to all actors; Otherwise, user can also supply different actions for each agent.
-#' Be sure to supply .act encapseled with list, even when user supplies only one agent action.
+#' @param .act a user-defined or built-in function object or list of them representing agent's actions.
+#' If user supplies only one action, it will then copied to all actors. User can also supply different actions for each agent as list.
 #'
 #' @details
 #' \code{setAgent_network} is a constructor of \code{netABM_network} object (D)
@@ -20,7 +19,9 @@
 #' The latter \code{act_label} is taken from the supplied object name of \code{.act}.
 #'
 #' There are two ways to set \code{.act}.
-#' The first way is to write the user's own function of agent's actions.
+#' The first way is to write the user's own function of agent's
+#' actions and attach it to an object and supply this object to \code{.act}.
+#' Do not write the function directly to \code{.act} because this will not be properly parsed.
 #' Upon writing an original function, be sure to set \code{D} as the first argument without any default;
 #' otherwise agent's action does not reflect dynamically to the changing \code{D} object during the simulation.
 #' \code{self} is a reserved for indicating the agent themselves.
@@ -31,7 +32,8 @@
 #' Second, if user wants to modify some argument, supply it as a form: \code{function_name(x = a new value)}.
 #' Third, if user wants to put another name to this modified function object, assign it with substitute().
 #' Then supply this substituted object to \code{.act}. The last method may be useful when the modification
-#' of the function is very long. For getting the ideas more concretely about how to supply a function to \code{.act},
+#' of the function is very long.
+#' For getting the ideas more concretely about how to supply a function to \code{.act},
 #' see the examples below.
 #'
 #' For now, \code{setABM_network} only supports directed networks.
@@ -45,35 +47,43 @@
 #' @importFrom rlang call_args
 #' @export
 #' @examples
+#' # Example 1: Save the user-defined action object as "agent_get_older"
 #' node_attr <- data.frame(
 #' age = c(0, 1, 2, 3, 4),
 #' sex = c("m","m","m","f","f"))
 #' network <- matrix(1, 5, 5)
 #'
 #' # Example of the user-defined action
-#' agent_get_older <- function(D){self$age <- self$age + 1}
+#' agent_get_older <- function(D){self$a$age <- self$a$age + 1}
 #'
-#' # Example 1
 #' D <- setABM_network(n = 5,
-#'                    node_attr = node_attr,
-#'                    networks = network,
-#'                    .act = list(agent_get_older))
+#'                     node_attr = node_attr,
+#'                     networks = network,
+#'                     .act = agent_get_older)
 #'
 #'# Example 2: Set .act supplied directly with an modified built-in function.
-#' D <- setABM_network(
+#'D <- setABM_network(
 #'   n = 5,
-#'   .act = list(actAgent_addEdges_random(.valueFunction = rnorm(n = 1, mean = 0, sd = 1))))
+#'   .act = actAgent_addEdges_random(.valueFunction = rnorm(n = 1, mean = 0, sd = 1)))
 #'
 #' # Example 3: Set .act via a substituted object.
 #' random2 <- substitute(actAgent_addEdges_random(.valueFunction = rnorm(n = 1, mean = 0, sd = 1)))
 #'
 #' D <- setABM_network(
-#'   n = 5,
-#'   .act = list(actAgent_addEdges_random(.valueFunction = rnorm(n = 1, mean = 0, sd = 1))))
+#'    n = 5,
+#'    .act = random2)
 #'
-
-
-
+#' # Example 4: Set diffenret actions for each agent.
+#'agent_get_older2 <- function(D, b = 1){self$a$age <- b*self$a$age + 1}
+#'
+#' D <- setABM_network(
+#'    n = 5,
+#'    .act = list(agent_get_older2(b = 1),
+#'                agent_get_older2(b = 2),
+#'                agent_get_older2(b = 3),
+#'                agent_get_older2(b = 4),
+#'                agent_get_older2(b = 5)))
+#'
 
 setABM_network <- function(
     n,
@@ -120,15 +130,21 @@ setABM_network <- function(
 
   ## .act:
   #### .actの要素の数ごとに：人数分コピーする
-  temp_label <- as.character(substitute(.act))[-1]
-  if(length(temp_label)==0){
+  temp_label <- as.character(substitute(.act))
+  if(temp_label[1]=="list"){
+    # リストの場合
+    act_label <- as.character(substitute(.act))[-1]
+    ### もしもlistに挟まれているが1個しか入っていない場合
+    if(length(act_label)==1){
+      act_label <- rep(act_label, n)
+    }
+    stopifnot("The number of actions within a list should correspond to the number of agents." = length(act_label)==n)
+  }else if(any(length(temp_label)==0|is.na(temp_label))){
+    # NULL/NAの場合
     act_label <- rep("NULL", n)
-    warning("The agents' actions are set as NULL. If this is not what you want, please check if you correctly set the agent's action as a list (e.g., list(actAgent_addEdges_random))")
-  }else if(length(temp_label)==1){
-    act_label <- rep(temp_label, n)
   }else{
-    stopifnot("The number of actions within a list should correspond to the number of agents." = length(temp_label)==n)
-    act_label <- temp_label
+    # .actに単体で設定されているものをn個分コピー
+    act_label <- rep(deparse(substitute(.act), width.cutoff = 500), n)
   }
 
   ### 各agentごとにfunctionが存在しない場合にfunctionに変更処理

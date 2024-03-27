@@ -11,9 +11,8 @@ setABM_network(n, node_attr = NULL, .act = list(NULL), networks = NULL)
 
 \item{node_attr}{vector/data.frame/list of attributes of agents (default: \code{NULL})}
 
-\item{.act}{list that contains user-defined or built-in function object representing agent's actions.
-If user supplies only one action, it will then copied to all actors; Otherwise, user can also supply different actions for each agent.
-Be sure to supply .act encapseled with list, even when user supplies only one agent action.}
+\item{.act}{a user-defined or built-in function object or list of them representing agent's actions.
+If user supplies only one action, it will then copied to all actors. User can also supply different actions for each agent as list.}
 
 \item{networks}{Single n times n matrix or dataframe, or list of multiple matrices. The default value \code{NULL} will result in creating a n times n matrix without any edges.}
 }
@@ -35,7 +34,9 @@ Each agent automatically get its \code{ID} and \code{act_label} and store them a
 The latter \code{act_label} is taken from the supplied object name of \code{.act}.
 
 There are two ways to set \code{.act}.
-The first way is to write the user's own function of agent's actions.
+The first way is to write the user's own function of agent's
+actions and attach it to an object and supply this object to \code{.act}.
+Do not write the function directly to \code{.act} because this will not be properly parsed.
 Upon writing an original function, be sure to set \code{D} as the first argument without any default;
 otherwise agent's action does not reflect dynamically to the changing \code{D} object during the simulation.
 \code{self} is a reserved for indicating the agent themselves.
@@ -46,37 +47,49 @@ just supply the function object to \code{.act} (e.g., .act = function_name).
 Second, if user wants to modify some argument, supply it as a form: \code{function_name(x = a new value)}.
 Third, if user wants to put another name to this modified function object, assign it with substitute().
 Then supply this substituted object to \code{.act}. The last method may be useful when the modification
-of the function is very long. For getting the ideas more concretely about how to supply a function to \code{.act},
+of the function is very long.
+For getting the ideas more concretely about how to supply a function to \code{.act},
 see the examples below.
 
 For now, \code{setABM_network} only supports directed networks.
 }
 \examples{
+# Example 1: Save the user-defined action object as "agent_get_older"
 node_attr <- data.frame(
 age = c(0, 1, 2, 3, 4),
 sex = c("m","m","m","f","f"))
 network <- matrix(1, 5, 5)
 
 # Example of the user-defined action
-agent_get_older <- function(D){self$age <- self$age + 1}
+agent_get_older <- function(D){self$a$age <- self$a$age + 1}
 
-# Example 1
 D <- setABM_network(n = 5,
-                   node_attr = node_attr,
-                   networks = network,
-                   .act = list(agent_get_older))
+                    node_attr = node_attr,
+                    networks = network,
+                    .act = agent_get_older)
 
 # Example 2: Set .act supplied directly with an modified built-in function.
 D <- setABM_network(
   n = 5,
-  .act = list(actAgent_addEdges_random(.valueFunction = rnorm(n = 1, mean = 0, sd = 1))))
+  .act = actAgent_addEdges_random(.valueFunction = rnorm(n = 1, mean = 0, sd = 1)))
 
 # Example 3: Set .act via a substituted object.
 random2 <- substitute(actAgent_addEdges_random(.valueFunction = rnorm(n = 1, mean = 0, sd = 1)))
 
 D <- setABM_network(
-  n = 5,
-  .act = list(actAgent_addEdges_random(.valueFunction = rnorm(n = 1, mean = 0, sd = 1))))
+   n = 5,
+   .act = random2)
+
+# Example 4: Set diffenret actions for each agent.
+agent_get_older2 <- function(D, b = 1){self$a$age <- b*self$a$age + 1}
+
+D <- setABM_network(
+   n = 5,
+   .act = list(agent_get_older2(b = 1),
+               agent_get_older2(b = 2),
+               agent_get_older2(b = 3),
+               agent_get_older2(b = 4),
+               agent_get_older2(b = 5)))
 
 }
 \author{
