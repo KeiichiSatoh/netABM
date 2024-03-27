@@ -49,6 +49,8 @@
 #' age = c(0, 1, 2, 3, 4),
 #' sex = c("m","m","m","f","f"))
 #' network <- matrix(1, 5, 5)
+#'
+#' # Example of the user-defined action
 #' agent_get_older <- function(D){self$age <- self$age + 1}
 #'
 #' # Example 1
