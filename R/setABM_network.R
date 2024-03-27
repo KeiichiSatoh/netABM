@@ -123,6 +123,7 @@ setABM_network <- function(
   temp_label <- as.character(substitute(.act))[-1]
   if(length(temp_label)==0){
     act_label <- rep("NULL", n)
+    warning("The agents' actions are set as NULL. If this is not what you want, please check if you correctly set the agent's action as a list (e.g., list(actAgent_addEdges_random))")
   }else if(length(temp_label)==1){
     act_label <- rep(temp_label, n)
   }else{
