@@ -2,6 +2,7 @@
 
 export(actAgent_addEdges_random)
 export(actAgent_nothing)
+export(agrABM_network)
 export(lapply_mms)
 export(runABM_network)
 export(selectAgent_all)
