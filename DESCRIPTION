@@ -14,6 +14,9 @@ LazyData: true
 Imports: 
     cachem,
     memoise,
+    ndtv,
+    network,
+    networkDynamic,
     R6,
     rlang
 Depends: 

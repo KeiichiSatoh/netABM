@@ -9,13 +9,13 @@ runABM_network(D, .stopCondition = NULL, .selectAgent = NULL, save_log = FALSE)
 \arguments{
 \item{D}{a \code{netABM} class object.}
 
+\item{.stopCondition}{A user-defined or built-in function object that determines when the simulation to stop.
+The default value \code{NULL} will result in running one simulation.}
+
 \item{.selectAgent}{A user-defined or built-in function object about which agents to select.
 The default value \code{NULL} will result in selecting all agents, meaning that all agents do their action each time.}
 
 \item{save_log}{logical; if the log of each run shold be saved. The default is \code{FALSE}.}
-
-\item{.stopCondition.}{A user-defined or built-in function object that determines when the simulation to stop.
-The default value \code{NULL} will result in running one simulation.}
 }
 \value{
 a \code{netABM_network} class object
@@ -37,11 +37,18 @@ The first way is to write the user's own function.
 Upon writing an original function, be sure to set \code{D} as the first argument without any default;
 otherwise agent's action does not reflect dynamically to the changing \code{D} object during the simulation.
 \code{self} is a reserved for indicating the agent themselves.
+In addition, each function should returns the following value:
+#' - \code{.stopCondition}: Returns \code{TRUE} if the condition of \code{D} reaches the desired condition
+\itemize{
+\item \code{.selectAgent}: Returns the character vector of the agent IDs (e.g., \code{"ID1"}, \code{"ID2"}...)
+In addition, be sure to write the function in such a way that it takes should \code{D} as the first argument without any default value.
+}
 
 The second way is to use a built-in function of this package.
 This second way actually has further two variations. First, the easiest one,
 just supply the function object to \code{.stopCondition} and \code{.selectAgent} (e.g., .act = function_name).
 Second, if user wants to modify some argument, supply it as a form: \code{function_name(x = a new value)}.
+See the examples below.
 }
 \examples{
 node_attr <- data.frame(
