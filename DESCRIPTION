@@ -18,6 +18,8 @@ Imports:
     network,
     networkDynamic,
     R6,
-    rlang
+    rlang,
+    sna,
+    vctrs
 Depends: 
     R (>= 2.10)
