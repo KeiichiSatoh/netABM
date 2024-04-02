@@ -41,3 +41,8 @@ get_net(D, 2)
 get_net(D, "net2")
 
 }
+\seealso{
+Other act_tools: 
+\code{\link{get_attr}()}
+}
+\concept{act_tools}

@@ -16,6 +16,7 @@
 #' @importFrom cachem cache_mem
 #' @importFrom sna rgraph
 #' @export
+#' @family act_tools
 #' @examples
 #' # Make a sample dataset
 #' D <- setABM_network(n = 5,
