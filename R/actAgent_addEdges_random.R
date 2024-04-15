@@ -80,7 +80,7 @@ actAgent_addEdges_random <- function(D,
            },
            "known" = {
              candid <- names(current_network)},
-           "all"   = {candid <- alter_candidate}
+           "all"   = {candid <- names(D$agents)}
     )
   }else{
     candid <- alter_candidate

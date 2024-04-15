@@ -2,6 +2,8 @@
 #' @description \code{get_net} creates a whole network matrix from the input \code{netABM} class D object.
 #' @param D An object of class \code{netABM}.
 #' @param which_net An integer or character string indicating the network to convert.
+#' @param space logical, whether network to get locates at space level (\code{TRUE}).
+#' The default is \code{FALSE} and the agent level network is returned.
 #' @details Upon writing the function of the agent's action, there is often the case
 #' that the action depends on the condition of the whole network. For example,
 #' if the agent's probability to form an edge with an alter depends on the indegree of the
@@ -32,15 +34,20 @@
 #' get_net(D, "net2")
 #'
 get_net <- memoise(
-  function(D, which_net = 1){
+  function(D, which_net = 1, space = FALSE){
+    if(space == TRUE){
+      level <- "space"
+    }else{
+      level <- "agents"
+    }
     # 投入Dの状況を取得する
-    n <- length(D$agents)
-    agent_names <- names(D$agents)
-    # 結合整形用に、すべてのagentが入った空のvectorを作成
+    n <- length(D[[level]])
+    node_names <- names(D[[level]])
+    # 結合整形用に、すべてのnodeが入った空のvectorを作成
     temp_vec <- rep(0, n)
-    names(temp_vec) <- agent_names
+    names(temp_vec) <- node_names
     # 各アクターのネットワークを取得
-    net_temp <- lapply(X = D$agents, function(X){
+    net_temp <- lapply(X = D[[level]], function(X){
       X$e[[which_net]]
     })
     # ネットワークがNULLになっているIDを取得し、NAに置き換える
@@ -51,7 +58,7 @@ get_net <- memoise(
     # 1行目を外し、row側にも名前を付ける
     mat <- mat[-1, ]
     mat[is.na(mat)] <- 0
-    rownames(mat) <- agent_names
+    rownames(mat) <- node_names
     # リターン
     mat
   }, cache = cache_mem(max_age = 900))

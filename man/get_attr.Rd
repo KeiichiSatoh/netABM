@@ -47,6 +47,7 @@ get_attr(D, c("age","sex"))
 }
 \seealso{
 Other act_tools: 
+\code{\link{add_edges_self}()},
 \code{\link{get_net}()}
 }
 \concept{act_tools}

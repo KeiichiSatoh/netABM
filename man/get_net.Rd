@@ -4,12 +4,15 @@
 \alias{get_net}
 \title{Get A Whole Network From A netABM Object.}
 \usage{
-get_net(D, which_net = 1)
+get_net(D, which_net = 1, space = FALSE)
 }
 \arguments{
 \item{D}{An object of class \code{netABM}.}
 
 \item{which_net}{An integer or character string indicating the network to convert.}
+
+\item{space}{logical, whether network to get locates at space level (\code{TRUE}).
+The default is \code{FALSE} and the agent level network is returned.}
 }
 \value{
 A whole network matrix created from \code{D}
@@ -43,6 +46,7 @@ get_net(D, "net2")
 }
 \seealso{
 Other act_tools: 
+\code{\link{add_edges_self}()},
 \code{\link{get_attr}()}
 }
 \concept{act_tools}

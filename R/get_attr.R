@@ -34,7 +34,6 @@
 #'
 #' # example 4: get multiple selected attributes
 #' get_attr(D, c("age","sex"))
-
 get_attr <- memoise::memoise(
   function(D, which_attr = NULL){
     # 投入Dの状況を取得する
@@ -53,6 +52,7 @@ get_attr <- memoise::memoise(
     # もしも列数が1の場合にはベクトルとして返す
     if(ncol(node_attr)==1){
       node_attr <- node_attr[[1]]
+      names(node_attr) <- agent_names
     }
     # return
     node_attr
