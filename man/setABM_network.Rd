@@ -60,17 +60,16 @@ see the examples below.
 \examples{
 # Example 1: Save the user-defined action object as "agent_get_older"
 agent_attr <- data.frame(
- age = c(0, 1, 2, 3, 4),
- sex = c("m","m","m","f","f"))
+  age = c(0, 1, 2, 3, 4),
+  sex = c("m","m","m","f","f"))
 agent_network <- matrix(1, 5, 5)
 
 # Example of the user-defined action
 agent_get_older <- function(D){self$a$age <- self$a$age + 1}
 
-
 D <- setABM_network(agent_n = 5,
-                   agent_attr = agent_attr,
-                   agent_f = agent_get_older,
+                    agent_attr = agent_attr,
+                    agent_f = agent_get_older,
                    agent_network = agent_network)
 
 # Example 2: Set agent_f directly with an modified built-in function.

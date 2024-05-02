@@ -82,8 +82,8 @@
 #' Example 1
 #' set.seed(1)
 #' move_to_P1 <- function(D){
-#'   D$stage$location$loc[self$a$ID, names(self$loc)] <- 0
-#'   D$stage$location$loc[self$a$ID, 1] <- 1
+#'   D$stage$location$loc[self$ID, names(self$loc)] <- 0
+#'   D$stage$location$loc[self$ID, 1] <- 1
 #' }
 #' D <- setABM_spatNetwork(agent_n = 10, place_n = 15, agent_f = move_to_P1)
 #' D$agent$A1$loc
@@ -237,7 +237,9 @@ setABM_spatNetwork <- function(
   ## place_network: リストの形に揃える
   ### Nullの場合
   if(is.null(place_network)){
-    place_network <- list(matrix(1, place_n, place_n)) # すべてつながっている状態
+    place_network <- matrix(1, place_n, place_n) # すべてつながっている状態
+    diag(place_network) <- 0
+    place_network <- list(place_network)
     names(place_network) <- "plc"
   }else if(is.data.frame(place_network)){
     place_object_name_network <- as.character(substitute(place_network))
@@ -274,7 +276,6 @@ setABM_spatNetwork <- function(
     temp <- matrix(0, agent_n, place_n)
     for(i in 1:agent_n){
       temp[i, agent_location[i]] <- 1
-      diag(temp) <- 0
     }
     location_network <- list()
     location_network$loc <- temp
@@ -597,3 +598,4 @@ setABM_spatNetwork <- function(
   ## DATAを返却
   D
 }
+

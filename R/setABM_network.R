@@ -48,18 +48,17 @@
 #' @export
 #' @examples
 #' # Example 1: Save the user-defined action object as "agent_get_older"
-#'agent_attr <- data.frame(
-#'  age = c(0, 1, 2, 3, 4),
-#'  sex = c("m","m","m","f","f"))
-#'agent_network <- matrix(1, 5, 5)
+#' agent_attr <- data.frame(
+#'   age = c(0, 1, 2, 3, 4),
+#'   sex = c("m","m","m","f","f"))
+#' agent_network <- matrix(1, 5, 5)
 #'
 #' # Example of the user-defined action
-#'agent_get_older <- function(D){self$a$age <- self$a$age + 1}
+#' agent_get_older <- function(D){self$a$age <- self$a$age + 1}
 #'
-#'
-#'D <- setABM_network(agent_n = 5,
-#'                    agent_attr = agent_attr,
-#'                    agent_f = agent_get_older,
+#' D <- setABM_network(agent_n = 5,
+#'                     agent_attr = agent_attr,
+#'                     agent_f = agent_get_older,
 #'                    agent_network = agent_network)
 #'
 #'# Example 2: Set agent_f directly with an modified built-in function.
@@ -299,7 +298,8 @@ setABM_network <- function(
   for(i in 1:agent_n){
     D$agent[[i]] <- network_Agent$new()
   }
-  D$stage$agent <- spatNetwork_stage_agentNetwork$new()
+  ## stage:agent network
+  D$stage$agent <- network_stage_agentNetwork$new()
 
   # Agentの情報付与----------------------------------
   ## 当該agentのメタ情報を付与する
