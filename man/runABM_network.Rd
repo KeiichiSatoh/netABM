@@ -7,7 +7,7 @@
 runABM_network(D, .stopCondition = NULL, .selectAgent = NULL, save_log = FALSE)
 }
 \arguments{
-\item{D}{a \code{netABM} class object.}
+\item{D}{a \code{netABM_network} class object.}
 
 \item{.stopCondition}{A user-defined or built-in function object that determines when the simulation to stop.
 The default value \code{NULL} will result in running one simulation.}
@@ -21,12 +21,12 @@ The default value \code{NULL} will result in selecting all agents, meaning that 
 a \code{netABM_network} class object
 }
 \description{
-\code{runABM_network} let agents their action defined by \code{.act} in the
+\code{runABM_network} let agents their action defined by \code{.f} in the
 \code{netABM_network} object.
 }
 \details{
 \code{runAgent_network} is a simulator based on \code{netABM_network} object (D).
-In each run the selected agents act their action defined \code{.act} of \code{netABM_network}
+In each run the selected agents act their action defined \code{.f} of \code{netABM_network}
 object.
 
 Because the counting system of \code{R} starts from 1, \code{runABM} counts the initial time starts from 1,
@@ -46,7 +46,7 @@ In addition, be sure to write the function in such a way that it takes should \c
 
 The second way is to use a built-in function of this package.
 This second way actually has further two variations. First, the easiest one,
-just supply the function object to \code{.stopCondition} and \code{.selectAgent} (e.g., .act = function_name).
+just supply the function object to \code{.stopCondition} and \code{.selectAgent} (e.g., .selectAgent = function_name).
 Second, if user wants to modify some argument, supply it as a form: \code{function_name(x = a new value)}.
 See the examples below.
 }
@@ -66,6 +66,10 @@ D <- runABM_network(D = D,
                     .stopCondition = stopABM_times(simTimes = 10))
 # result
 D
+}
+\seealso{
+Other runABM: 
+\code{\link{runABM_spatNetwork}()}
 }
 \author{
 Keiichi Satoh

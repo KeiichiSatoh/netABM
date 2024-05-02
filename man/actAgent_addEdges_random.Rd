@@ -82,7 +82,7 @@ D$agents$ID1$e                    # One edges added
 }
 \seealso{
 Other actAgent: 
-\code{\link{actAgent_nothing}()}
+\code{\link{f_nothing}()}
 }
 \author{
 Keiichi Satoh

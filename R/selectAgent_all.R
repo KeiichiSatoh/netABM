@@ -19,5 +19,5 @@
 #' selectAgent_all(D = D)
 
 selectAgent_all <- memoise(
-  function(D){names(D$agents)},
+  function(D){names(D$agent)},
   cache = cache_mem(max_age = 900))

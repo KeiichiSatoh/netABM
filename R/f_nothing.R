@@ -3,6 +3,8 @@
 #' \code{actAgent_nothing} returns NULL regardless of any D.
 #' @param D The D object. Note that this argument is internally supplied within
 #' runABM and should not be modified by the user.
+#' @param self self of the R6 class. Note that this argument is internally supplied within
+#' runABM and should not be modified by the user.
 #' @returns  NULL
 #' @details
 #' \code{actAgent_nothing} is intended to express the agent's non-action.
@@ -18,5 +20,5 @@
 #' setABM_network(n = 5,
 #'                .act = actAgent_nothing)
 
-actAgent_nothing <- function(D){}
+f_nothing <- function(D){NULL}
 

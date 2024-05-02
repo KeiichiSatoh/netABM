@@ -4,17 +4,22 @@
 \alias{setABM_network}
 \title{Setting netABM_network Objects}
 \usage{
-setABM_network(n, node_attr = NULL, .act = list(NULL), networks = NULL)
+setABM_network(
+  agent_n,
+  agent_attr = NULL,
+  agent_f = list(NULL),
+  agent_network = NULL
+)
 }
 \arguments{
-\item{n}{integer. Number of agents}
+\item{agent_n}{integer. Number of agents}
 
-\item{node_attr}{vector/data.frame/list of attributes of agents (default: \code{NULL})}
+\item{agent_attr}{vector/data.frame/list of attributes of agents (default: \code{NULL})}
 
-\item{.act}{a user-defined or built-in function object or list of them representing agent's actions.
+\item{agent_f}{a user-defined or built-in function object or list of them representing agent's actions.
 If user supplies only one action, it will then copied to all actors. User can also supply different actions for each agent as list.}
 
-\item{networks}{Single n times n matrix or dataframe, or list of multiple matrices. The default value \code{NULL} will result in creating a n times n matrix without any edges.}
+\item{agent_network}{Single n times n matrix or dataframe, or list of multiple matrices. The default value \code{NULL} will result in creating a n times n matrix without any edges.}
 }
 \value{
 a \code{netABM_network} class object D (see Details)
@@ -24,51 +29,51 @@ a \code{netABM_network} class object D (see Details)
 }
 \details{
 \code{setAgent_network} is a constructor of \code{netABM_network} object (D)
-which has \code{agents}, \code{time}(set as 1), and \code{log} (set as NA) as a list format.
-\code{agents} contains each agent's attribute listed under \code{a} (i.e. "attributes"),
-networks listed under \code{e} (i.e. "edges"), and actions as \code{.act}.
-The each agent under \code{agents} is \code{R6} class object from package \code{R6}.
+which has \code{agent}, \code{stage}, \code{time}(set as 1), and \code{log} (set as NA)
+as a list format.
+Each agent in the \code{agent} has their attribute listed under \code{a} (i.e. "attributes"),
+list of the names of agent partners, and the action as \code{.f} (i.e., "function").
+The each agent under \code{agent} and networks under \code{stage} are \code{R6} class objects from package \code{R6}.
 Object \code{D} also has a class \code{netABM} which is the parent class of \code{netABM_network}.
 
 Each agent automatically get its \code{ID} and \code{act_label} and store them as their attributes.
-The latter \code{act_label} is taken from the supplied object name of \code{.act}.
+The latter \code{act_label} is taken from the supplied object name of \code{agent_f}.
 
-There are two ways to set \code{.act}.
+There are two ways to set \code{agnet_f}.
 The first way is to write the user's own function of agent's
-actions and attach it to an object and supply this object to \code{.act}.
-Do not write the function directly to \code{.act} because this will not be properly parsed.
+actions and attach it to an object and supply this object to \code{agent_f}.
+Do not write the function directly to \code{agent_f} because this will not be properly parsed.
 Upon writing an original function, be sure to set \code{D} as the first argument without any default;
 otherwise agent's action does not reflect dynamically to the changing \code{D} object during the simulation.
 \code{self} is a reserved for indicating the agent themselves.
 
-The second way of setting \code{.act} is to use a built-in function of this package.
+The second way of setting \code{agent_f} is to use a built-in function of this package.
 This second way actually has further three variations. First, the easiest one,
-just supply the function object to \code{.act} (e.g., .act = function_name).
+just supply the function object to \code{agent_f} (e.g., agent_f = function_name).
 Second, if user wants to modify some argument, supply it as a form: \code{function_name(x = a new value)}.
 Third, if user wants to put another name to this modified function object, assign it with substitute().
-Then supply this substituted object to \code{.act}. The last method may be useful when the modification
+Then supply this substituted object to \code{agnet_f}. The last method may be useful when the modification
 of the function is very long.
-For getting the ideas more concretely about how to supply a function to \code{.act},
+For getting the ideas more concretely about how to supply a function to \code{agent_f},
 see the examples below.
-
-For now, \code{setABM_network} only supports directed networks.
 }
 \examples{
 # Example 1: Save the user-defined action object as "agent_get_older"
-node_attr <- data.frame(
-age = c(0, 1, 2, 3, 4),
-sex = c("m","m","m","f","f"))
-network <- matrix(1, 5, 5)
+agent_attr <- data.frame(
+ age = c(0, 1, 2, 3, 4),
+ sex = c("m","m","m","f","f"))
+agent_network <- matrix(1, 5, 5)
 
 # Example of the user-defined action
 agent_get_older <- function(D){self$a$age <- self$a$age + 1}
 
-D <- setABM_network(n = 5,
-                    node_attr = node_attr,
-                    networks = network,
-                    .act = agent_get_older)
 
-# Example 2: Set .act supplied directly with an modified built-in function.
+D <- setABM_network(agent_n = 5,
+                   agent_attr = agent_attr,
+                   agent_f = agent_get_older,
+                   agent_network = agent_network)
+
+# Example 2: Set agent_f directly with an modified built-in function.
 D <- setABM_network(
   n = 5,
   .act = actAgent_addEdges_random(.valueFunction = rnorm(n = 1, mean = 0, sd = 1)))
@@ -91,6 +96,10 @@ D <- setABM_network(
                agent_get_older2(b = 4),
                agent_get_older2(b = 5)))
 
+}
+\seealso{
+Other setABM: 
+\code{\link{setABM_spatNetwork}()}
 }
 \author{
 Keiichi Satoh

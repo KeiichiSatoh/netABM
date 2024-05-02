@@ -1,19 +1,23 @@
-#' @title Run the simulation based on the netABM_network object
+#' @title Run the simulation based on the netABM_spatNetwork object
 #' @description
-#' \code{runABM_network} let agents their action defined by \code{.f} in the
-#' \code{netABM_network} object.
-#' @param D a \code{netABM_network} class object.
-#' @param .stopCondition A user-defined or built-in function object that determines when the simulation to stop.
+#' \code{runABM_spatNetwork} let agents their action defined by \code{.} in the
+#' \code{netABM_spatNetwork} object.
+#' @param D a \code{netABM_spatNetwork} class object.
+#' @param .stopCondition A user-defined or built-in function object that
+#' determines when the simulation to stop.
 #' The default value \code{NULL} will result in running one simulation.
-#' @param .selectAgent A user-defined or built-in function object about which agents to select.
-#' The default value \code{NULL} will result in selecting all agents, meaning that all agents do their action each time.
-#' @param save_log logical; if the log of each run shold be saved. The default is \code{FALSE}.
+#' @param .selectAgent A user-defined or built-in function object about
+#' which agents to select. The default value \code{NULL} will result in
+#' selecting all agents, meaning that all agents do their action each time.
+#' @param save_log logical; if the log of each run should be saved.
+#' The default is \code{FALSE}.
 #' @details
-#' \code{runAgent_network} is a simulator based on \code{netABM_network} object (D).
-#' In each run the selected agents act their action defined \code{.f} of \code{netABM_network}
+#' \code{runAgent_spatNetwork} is a simulator based on \code{netABM_spatNetwork} object (D).
+#' In each run the selected agents act their action defined \code{.f} of \code{netABM_spatNetwork}
 #' object.
 #'
-#' Because the counting system of \code{R} starts from 1, \code{runABM} counts the initial time starts from 1,
+#' Because the counting system of \code{R} starts from 1, \code{runABM} counts
+#' the initial time starts from 1,
 #' which means that the one run of the simulation corresponds to time 2.
 #'
 #' For setting \code{.stopCondition} and \code{.selectAgent} condition, there are two different ways.
@@ -23,47 +27,45 @@
 #' \code{self} is a reserved for indicating the agent themselves.
 #' In addition, each function should returns the following value:
 #' #' - \code{.stopCondition}: Returns \code{TRUE} if the condition of \code{D} reaches the desired condition
-#' - \code{.selectAgent}: Returns the character vector of the agent IDs (e.g., \code{"ID1"}, \code{"ID2"}...)
-#' In addition, be sure to write the function in such a way that it takes should \code{D} as the first argument without any default value.
+#' - \code{.selectAgent}: Returns the character vector of the agent IDs (e.g., \code{"A1"}, \code{"A2"}...)
+#' In addition, be sure to write the function in such a way that it takes \code{D} as the first argument without any default value.
 #'
 #' The second way is to use a built-in function of this package.
 #' This second way actually has further two variations. First, the easiest one,
-#' just supply the function object to \code{.stopCondition} and \code{.selectAgent} (e.g., .selectAgent = function_name).
+#' just supply the function object to \code{.stopCondition} and \code{.selectAgent} (e.g., .stopCondition = function_name).
 #' Second, if user wants to modify some argument, supply it as a form: \code{function_name(x = a new value)}.
 #' See the examples below.
 #'
-#' @returns  a \code{netABM_network} class object
+#' @returns  a \code{netABM_spatNetwork} class object
 #' @family runABM
 #' @author Keiichi Satoh
 #' @importFrom R6 R6Class
 #' @importFrom rlang parse_expr
 #' @importFrom rlang call_name
 #' @importFrom rlang call_args
+#' @importFrom memoise memoise
 #' @import Matrix
+#' @importFrom cachem cache_mem
 #' @export
 #' @examples
-#' node_attr <- data.frame(
-#'  age = c(0, 0, 0, 0, 0),
-#'  sex = c("m","m","m","f","f"))
-#' network <- matrix(0, 5, 5)
-#' agent_get_older <- function(D){self$a$age <- self$a$age + 1}
+#' # Example 1
+#' set.seed(1)
+#' move_to_P1 <- function(D){
+#' D$stage$location$loc[self$ID, self$loc] <- 0
+#' D$stage$location$loc[self$ID, 1] <- 1
+#' }
 #'
-#' # Create the netABM_network object
-#' D <- setABM_network(n = 5,
-#'                     node_attr = node_attr,
-#'                     .act = list(agent_get_older))
-#' # run the simulation
-#' D <- runABM_network(D = D,
-#'                     .stopCondition = stopABM_times(simTimes = 10))
-#' # result
-#' D
-runABM_network <- function(D,
-                           .stopCondition = NULL,
-                           .selectAgent = NULL,
-                           save_log = FALSE){
+#' D <- setABM_spatNetwork(agent_n = 5,  agent_f = move_to_P1, place_n = 10)
+#' D$stage$location
+#' D <- runABM_spatNetwork(D = D, save_log = TRUE)
+#' D$stage$location
+runABM_spatNetwork <- function(D,
+                               .stopCondition = NULL,
+                               .selectAgent = NULL,
+                               save_log = FALSE){
   # Dをチェック(ABM_networkクラスかどうかでwaningを出す)
-  if(!any(class(D) == "netABM_network")){
-    warning("D is supposed to be the class of: netABM_network")
+  if(!any(class(D) == "netABM_spatNetwork")){
+    warning("D is supposed to be the class of: netABM_spatNetwork")
   }
 
   # .stopCondition
@@ -74,7 +76,7 @@ runABM_network <- function(D,
            .stopCondition_name <- "stopABM_times"
            .stopCondition_args <- list(simTimes = 1)
            stopCondition_label <- "stopABM_times"
-         },
+           },
          "name" = {
            stopifnot(".stopCondition object does not exists in the environment" = exists(as.character(temp_stopCondition)))
            stopifnot(".stopCondition object is not the class of function" = is.function(get(as.character(temp_stopCondition))))
@@ -191,8 +193,15 @@ runABM_network <- function(D,
         as.list(sim_env$D$agent[[i]])["a"]
       })
       names(sim_env$new_log$agent) <- names(sim_env$D$agent)
+      #### place
+      sim_env$new_log$place <- lapply(1:length(sim_env$D$place), function(i){
+        as.list(sim_env$D$place[[i]])["a"]
+      })
+      names(sim_env$new_log$place) <- names(sim_env$D$place)
       #### stage
       sim_env$new_log$stage$agent <- as.list(sim_env$D$stage$agent)[!names(sim_env$D$stage$agent) %in% c(".__enclos_env__","clone","print")]
+      sim_env$new_log$stage$place <- as.list(sim_env$D$stage$place)[!names(sim_env$D$stage$place) %in% c(".__enclos_env__","clone","print")]
+      sim_env$new_log$stage$location <- as.list(sim_env$D$stage$location)[!names(sim_env$D$stage$place) %in% c(".__enclos_env__","clone","print")]
       #### time
       sim_env$new_log$time <- sim_env$D$time
       #### logを付与
@@ -205,9 +214,15 @@ runABM_network <- function(D,
         as.list(sim_env$D$agent[[i]])["a"]
       })
       names(sim_env$new_log$agent) <- names(sim_env$D$agent)
+      #### place
+      sim_env$new_log$place <- lapply(1:length(sim_env$D$place), function(i){
+        as.list(sim_env$D$place[[i]])["a"]
+      })
+      names(sim_env$new_log$place) <- names(sim_env$D$place)
       #### stage
       sim_env$new_log$stage$agent <- as.list(sim_env$D$stage$agent)[!names(sim_env$D$stage$agent) %in% c(".__enclos_env__","clone","print")]
-      #### time
+      sim_env$new_log$stage$place <- as.list(sim_env$D$stage$place)[!names(sim_env$D$stage$place) %in% c(".__enclos_env__","clone","print")]
+      sim_env$new_log$stage$location <- as.list(sim_env$D$stage$location)[!names(sim_env$D$stage$place) %in% c(".__enclos_env__","clone","print")]
       sim_env$new_log$time <- sim_env$D$time
       sim_env$D$log <- c(sim_env$D$log, list(sim_env$new_log))
     }
@@ -244,6 +259,8 @@ runABM_network <- function(D,
       names(sim_env$new_log$place) <- names(sim_env$D$place)
       #### stage
       sim_env$new_log$stage$agent <- as.list(sim_env$D$stage$agent)[!names(sim_env$D$stage$agent) %in% c(".__enclos_env__","clone","print")]
+      sim_env$new_log$stage$place <- as.list(sim_env$D$stage$place)[!names(sim_env$D$stage$place) %in% c(".__enclos_env__","clone","print")]
+      sim_env$new_log$stage$location <- as.list(sim_env$D$stage$location)[!names(sim_env$D$stage$place) %in% c(".__enclos_env__","clone","print")]
       sim_env$new_log$time <- sim_env$D$time
       sim_env$D$log <- c(sim_env$D$log, list(sim_env$new_log))
 
