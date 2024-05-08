@@ -69,6 +69,7 @@ D
 }
 \seealso{
 Other runABM: 
+\code{\link{runABM_ca}()},
 \code{\link{runABM_spatNetwork}()}
 }
 \author{

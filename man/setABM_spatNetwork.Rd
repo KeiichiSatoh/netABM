@@ -111,6 +111,7 @@ D$agent$A1$loc      # A1 moved to P1
 }
 \seealso{
 Other setABM: 
+\code{\link{setABM_ca}()},
 \code{\link{setABM_network}()}
 }
 \author{

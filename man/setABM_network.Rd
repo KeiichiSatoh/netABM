@@ -98,6 +98,7 @@ D <- setABM_network(
 }
 \seealso{
 Other setABM: 
+\code{\link{setABM_ca}()},
 \code{\link{setABM_spatNetwork}()}
 }
 \author{

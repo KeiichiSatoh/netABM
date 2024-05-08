@@ -319,8 +319,8 @@ setABM_spatNetwork <- function(
   }
 
   ## IDを付与する----------------------------
-  agent_ID <- paste0("A", 1:agent_n)
-  place_ID <- paste0("P", 1:place_n)
+  agent_ID <- 1:agent_n
+  place_ID <- 1:place_n
   ## agent_attrに"ID"という名前の列がある場合には、"ID_user"と変更する
   if(any(colnames(agent_attr)=="ID")){
     colnames(agent_attr)[which(colnames(agent_attr)=="ID")] <- "ID_user"
@@ -424,6 +424,8 @@ setABM_spatNetwork <- function(
       a = list(field_agent_attr),
       .f = NA,
       print = function(...){
+        # ID
+        cat("ID: ", self$ID, "\n", sep = "")
         # attributes(ある場合)
         if(!is.null(agent_attr)){
           for(m in 1:ncol(agent_attr)){
@@ -453,6 +455,8 @@ setABM_spatNetwork <- function(
       ID = NA,
       a = list(field_place_attr),
       print = function(...){
+        # ID
+        cat("ID: ", self$ID, sep = "")
         # attributes(ある場合)
         if(!is.null(place_attr)){
           for(m in 1:ncol(place_attr)){
@@ -525,9 +529,9 @@ setABM_spatNetwork <- function(
   ## Dとして入れ物を用意し、IDを貼り付ける
   D <- list()
   D$agent <- vector(mode = "list", agent_n)
-  names(D$agent) <- agent_ID
+  names(D$agent) <- paste0("A", agent_ID)
   D$place <- vector(mode = "list", place_n)
-  names(D$place) <- place_ID
+  names(D$place) <- paste0("P", place_ID)
   D$stage <- vector(mode = "list", 3)
   names(D$stage) <- c("agent","place","location")
 
