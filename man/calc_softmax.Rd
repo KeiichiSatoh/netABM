@@ -2,25 +2,73 @@
 % Please edit documentation in R/calc_softmax.R
 \name{calc_softmax}
 \alias{calc_softmax}
-\title{package
-library(rlang)}
+\alias{choose_softmax}
+\title{Calculate Probabilities Using Softmax Function}
 \usage{
 calc_softmax(formula, data = NULL, standardize = FALSE)
+
+choose_softmax(formula, data = NULL, standardize = FALSE, n = 1)
+}
+\arguments{
+\item{formula}{A formula specifying the model.
+The left-hand side (LHS) can optionally specify the labels,
+and the right-hand side (RHS) specifies the predictors.}
+
+\item{data}{A data frame containing the variables in the formula.}
+
+\item{standardize}{A logical value indicating whether to standardize numeric predictors.
+Default is \code{FALSE}.}
+
+\item{n}{An integer specifying the number of items to choose. Default is {1}. Only Used for the \code{choose_softmax}.}
+}
+\value{
+\code{calc_softmax} returns A named vector of softmax probabilities.
+If the LHS of the formula is specified, the names of the vector are derived from the LHS.
+Otherwise, the names are row indices.
+
+\code{choose_softmax} returns A vector of chosen items based on the softmax probabilities,
+with length equal to the specified \code{n}.
 }
 \description{
-package
-library(rlang)
+This function calculates the probabilities of choosing the dependent variable
+based on the softmax probabilities for a given formula and dataset.
 }
 \details{
-calc_softmax(Y ~ X1 * X2, data = dat, standardize = FALSE)
-calc_softmax(  ~ X1 * X2, data = dat, standardize = FALSE)
+\code{calc_softmax}  evaluates the specified formula in the context of the provided data frame.
+It computes the probabilities for the predictors on the RHS of the formula.
+If standardize is \code{TRUE}, numeric predictors are standardized
+before calculating the probabilities.
+
+\code{choose_softmax} samples from the choices based on these probabilities.
+
+This function can be used to calculate the probabilities according to which agent choose the options.
 }
-\section{EXAMPLE}{
+\examples{
+# Create sample data
 n <- 10
 dat <- data.frame(
-Y = LETTERS\link{1:10},
-X1 = rnorm(n),
-X2 = rnorm(n)
-)
-}
+   Y = LETTERS[1:10],
+   X1 = rnorm(n),
+   X2 = rnorm(n)
+ )
 
+# The left-hand formula is used to index the result
+calc_softmax(Y ~ X1 * X2, data = dat, standardize = FALSE)
+# Without the left-hand specification, the result is returned with the row index
+calc_softmax(~ X1 * X2, data = dat, standardize = FALSE)
+
+# Choose based on softmax probabilities
+choose_softmax(Y ~ X1 * X2, data = dat, standardize = FALSE, n = 2)
+
+}
+\seealso{
+Other f_tools: 
+\code{\link{ca_2d_to_3d}()},
+\code{\link{ca_move}()},
+\code{\link{get_attr}()},
+\code{\link{get_ca_loc}()}
+}
+\author{
+Keiichi Satoh
+}
+\concept{f_tools}

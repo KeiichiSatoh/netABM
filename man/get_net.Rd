@@ -46,7 +46,6 @@ get_net(D, "net2")
 }
 \seealso{
 Other act_tools: 
-\code{\link{add_edges_self}()},
-\code{\link{get_attr}()}
+\code{\link{add_edges_self}()}
 }
 \concept{act_tools}

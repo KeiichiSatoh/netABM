@@ -2,14 +2,59 @@
 % Please edit documentation in R/ca_move.R
 \name{ca_move}
 \alias{ca_move}
-\title{D <- setABM_ca(agent_n = 5)
-ca_move(D, ID = 1, where_to = 5, which_ca = 1)
-D$ca}
+\title{Move an Agent in a Cellular Automaton (CA)}
 \usage{
 ca_move(D, ID, where_to, which_ca = 1)
 }
-\description{
-D <- setABM_ca(agent_n = 5)
-ca_move(D, ID = 1, where_to = 5, which_ca = 1)
-D$ca
+\arguments{
+\item{D}{A \code{netABM_ca} class object set by \code{setABM_ca} function.}
+
+\item{ID}{The ID of the agent to be moved.}
+
+\item{where_to}{An integer specifying the new location for the agent within the CA.}
+
+\item{which_ca}{An index or name specifying which CA to use from the \code{D} list. Default is \code{1}.}
 }
+\value{
+The function updates the CA in place and does not return a value.
+}
+\description{
+This function moves an agent from its current location
+to a specified new location within a cellular automaton (CA).
+}
+\details{
+The function identifies the current location of the specified agent ID in the CA.
+It then attempts to move the agent to the specified new location.
+If the destination is already occupied by another agent, the move is not performed,
+and a message is displayed. Otherwise, the agent is moved,
+and its original location is cleared.
+}
+\examples{
+# prepare an example dataset
+set.seed(1)
+ca <- init_ca(dim = c(3, 3), agent_n = 5)
+D <- setABM_ca(agent_n = 5, ca = ca)
+
+# ID1 locates at the place 9
+D$ca$ca
+
+# ID1 moves
+ca_move(D, ID = 1, where_to = 5, which_ca = "ca")
+
+# ID1 now moved to the place 5
+D$ca$ca
+
+}
+\seealso{
+Other ca_tools: 
+\code{\link{ca_2d_to_3d}()},
+\code{\link{get_ca_loc}()}
+
+Other f_tools: 
+\code{\link{ca_2d_to_3d}()},
+\code{\link{calc_softmax}()},
+\code{\link{get_attr}()},
+\code{\link{get_ca_loc}()}
+}
+\concept{ca_tools}
+\concept{f_tools}

@@ -48,8 +48,10 @@ get_attr(D, c("age","sex"))
 
 }
 \seealso{
-Other act_tools: 
-\code{\link{add_edges_self}()},
-\code{\link{get_net}()}
+Other f_tools: 
+\code{\link{ca_2d_to_3d}()},
+\code{\link{ca_move}()},
+\code{\link{calc_softmax}()},
+\code{\link{get_ca_loc}()}
 }
-\concept{act_tools}
+\concept{f_tools}

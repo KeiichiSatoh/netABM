@@ -13,7 +13,7 @@
 #' @returns A vector if only one attribute is queried and a data.frame if multiple attributes.
 #' @importFrom memoise memoise
 #' @importFrom cachem cache_mem
-#' @family act_tools
+#' @family f_tools
 #' @export
 #' @examples
 #' # Create the netABM_network object

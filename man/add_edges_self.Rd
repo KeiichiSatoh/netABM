@@ -86,7 +86,6 @@ D$agents$ID1$e          # An edge added with ID2
 }
 \seealso{
 Other act_tools: 
-\code{\link{get_attr}()},
 \code{\link{get_net}()}
 }
 \concept{act_tools}
