@@ -4,13 +4,7 @@
 \alias{setABM_ca}
 \title{Setting netABM_ca (Cellular Automaton) Objects}
 \usage{
-setABM_ca(
-  agent_n,
-  agent_attr = NULL,
-  agent_f = list(NULL),
-  agent_location = NULL,
-  ca = NULL
-)
+setABM_ca(agent_n, agent_attr = NULL, agent_f = list(NULL), ca = NULL)
 }
 \arguments{
 \item{agent_n}{integer. Number of agents}
@@ -19,13 +13,13 @@ setABM_ca(
 
 \item{agent_f}{a user-defined or built-in function object or list of them representing agent's actions.}
 
-\item{agent_location}{vector, data.frame, matrix or list of agent location.
-See the details for how to create each type of location object. The default \code{NULL} will allocate
-each agents randomly to each place.}
-
 \item{ca}{A matrix or list of matrices of cellular automaton. The default \code{NULL} will result in creating a
 \code{agent_n}*\code{agent_n} square matrix except for the case that \code{agent_location} is provided as a matrix or list format:
 In such case \code{ca} is overwritten by \code{agent_location}.}
+
+\item{agent_location}{vector, data.frame, matrix or list of agent location.
+See the details for how to create each type of location object. The default \code{NULL} will allocate
+each agents randomly to each place.}
 }
 \value{
 a \code{netABM_ca} class object D (see Details)

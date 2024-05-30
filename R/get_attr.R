@@ -34,26 +34,49 @@
 #'
 #' # example 4: get multiple selected attributes
 #' get_attr(D, c("age","sex"))
+#'
+#'
+
 get_attr <- memoise::memoise(
-  function(D, which_attr = NULL){
+  function(D, which_attr = NULL, from_log = FALSE, attr_long = FALSE){
     # 投入Dの状況を取得する
-    n <- length(D$agents)
-    agent_names <- names(D$agents)
+    n <- length(D$agent)
     # which_attr = NULLの場合
     if(is.null(which_attr)){
-      which_attr <- names(D$agents[[1]]$a)
+      which_attr <- names(D$agent[[1]]$a)
     }
-    # attrを取得
-    temp_attr <- lapply(X = D$agents, function(X){
-      data.frame(X$a[which_attr])
-    })
-    # rbindする
-    node_attr <- do.call(rbind, temp_attr)
-    # もしも列数が1の場合にはベクトルとして返す
-    if(ncol(node_attr)==1){
-      node_attr <- node_attr[[1]]
-      names(node_attr) <- agent_names
-    }
+    # IF: from_log = FALSE
+    if(from_log == FALSE){
+      # attrを取得
+      temp_attr <- lapply(X = D$agent, function(X){
+        data.frame(X$a[which_attr], ID = X$ID)
+      })
+      # rbindする
+      attr <- do.call(rbind, temp_attr)
+      rownames(attr) <- NULL
+    }else{
+      ## from_log == TRUEの場合
+      attr <- vector("list", length = length(D$log))
+      for(t in 1:length(D$log)){
+        temp_attr <- lapply(X = D$log[[t]]$agent, function(X){
+          data.frame(X$a[which_attr], ID = X$ID)
+        })
+        temp_attr <- do.call(rbind, temp_attr)
+        temp_attr <- data.frame(temp_attr, time = D$log[[t]]$time)
+        rownames(temp_attr) <- NULL
+        attr[[t]] <- temp_attr
+      }
+
+      ## attr_long == FALSEの場合
+      if(attr_long == FALSE){
+        names(attr) <- names(D$log)
+      }else{
+        ### attr_long == TRUEの場合
+        attr <- do.call(rbind, attr)
+      }
+    } ## from_log=Tここまで
     # return
-    node_attr
+    attr
   }, cache = cachem::cache_mem(max_age = 900))
+
+

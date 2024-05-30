@@ -4,7 +4,7 @@
 \alias{print.netABM_spatNetwork}
 \title{Printing the netABM_spatNetwork class}
 \usage{
-print.netABM_spatNetwork(D)
+\method{print}{netABM_spatNetwork}(D)
 }
 \arguments{
 \item{D}{A netABM_spatNetwork object}
@@ -16,6 +16,7 @@ Printing the netABM_spatNetwork class
 
 D <- setABM_spatNetwork(agent_n = 5, place_n = 10)
 print.netABM_spatNetwork(D)
+print(D)
 
-print(D)    # do the same
+D    # do the same
 }

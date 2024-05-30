@@ -189,11 +189,11 @@ runABM_ca <- function(D,
       sim_env$new_log <- list()
       #### agent
       sim_env$new_log$agent <- lapply(1:length(sim_env$D$agent), function(i){
-        as.list(sim_env$D$agent[[i]])["a"]
+        as.list(sim_env$D$agent[[i]])[c("ID","a")]
       })
       names(sim_env$new_log$agent) <- names(sim_env$D$agent)
       #### stage
-      sim_env$new_log$stage$ca <- as.list(sim_env$D$stage$ca)[!names(sim_env$D$stage$ca) %in% c(".__enclos_env__","clone","print")]
+      sim_env$new_log$ca <- as.list(sim_env$D$ca)[!names(sim_env$D$ca) %in% c(".__enclos_env__","clone","print")]
       #### time
       sim_env$new_log$time <- sim_env$D$time
       #### logを付与
@@ -203,11 +203,11 @@ runABM_ca <- function(D,
       sim_env$new_log <- list()
       #### agent
       sim_env$new_log$agent <- lapply(1:length(sim_env$D$agent), function(i){
-        as.list(sim_env$D$agent[[i]])["a"]
+        as.list(sim_env$D$agent[[i]])[c("ID","a")]
       })
       names(sim_env$new_log$agent) <- names(sim_env$D$agent)
       #### stage
-      sim_env$new_log$stage$ca <- as.list(sim_env$D$stage$ca)[!names(sim_env$D$stage$ca) %in% c(".__enclos_env__","clone","print")]
+      sim_env$new_log$ca <- as.list(sim_env$D$ca)[!names(sim_env$D$ca) %in% c(".__enclos_env__","clone","print")]
       #### time
       sim_env$new_log$time <- sim_env$D$time
       #### log
@@ -236,11 +236,11 @@ runABM_ca <- function(D,
       sim_env$new_log <- list()
       #### agent
       sim_env$new_log$agent <- lapply(1:length(sim_env$D$agent), function(i){
-        as.list(sim_env$D$agent[[i]])["a"]
+        as.list(sim_env$D$agent[[i]])[c("ID","a")]
       })
       names(sim_env$new_log$agent) <- names(sim_env$D$agent)
       #### stage
-      sim_env$new_log$stage$ca <- as.list(sim_env$D$stage$ca)[!names(sim_env$D$stage$ca) %in% c(".__enclos_env__","clone","print")]
+      sim_env$new_log$ca <- as.list(sim_env$D$ca)[!names(sim_env$D$ca) %in% c(".__enclos_env__","clone","print")]
       #### time
       sim_env$new_log$time <- sim_env$D$time
       #### log

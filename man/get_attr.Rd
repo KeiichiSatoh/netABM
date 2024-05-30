@@ -4,7 +4,7 @@
 \alias{get_attr}
 \title{Get A Agents' Attributes From A netABM Object.}
 \usage{
-get_attr(D, which_attr = NULL)
+get_attr(D, which_attr = NULL, from_log = FALSE, attr_long = FALSE)
 }
 \arguments{
 \item{D}{An object of class \code{netABM}.}
@@ -44,6 +44,8 @@ get_attr(D, 2)
 
 # example 4: get multiple selected attributes
 get_attr(D, c("age","sex"))
+
+
 }
 \seealso{
 Other act_tools: 

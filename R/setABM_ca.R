@@ -102,57 +102,43 @@
 #' D <- setABM_ca(agent_n = 5, agent_attr = agent_attr,
 #'               agent_f = move_to_agr1, ca = ca1)
 
+
 setABM_ca <- function(
     agent_n,
     agent_attr = NULL,
     agent_f = list(NULL),
-    agent_location = NULL,
     ca = NULL){
+  # インプットされたオブジェクトをsubstituteする
+  agent_attr_subst <- substitute(agent_attr)
+
   # インプットの形態を確認する------------
   # Agentに関して=========================
   ## agent_n: 数値データであることを確認
   stopifnot("agent_n must be numeric." = is.numeric(agent_n))
   ## agent_attr:data.frameの形に揃える
-  ### リストの場合
-  if(is.list(agent_attr)){
-    if(is.null(names(agent_attr))){
-      names(agent_attr) <- paste0("X", 1:length(agent_attr))
-    }
-    agent_attr <- as.data.frame(agent_attr, col.names = names(agent_attr))
-  }else if(is.vector(agent_attr)){
-    ### ベクトルの場合
-    object_name_vector <- as.character(substitute(agent_attr))
-    agent_attr <- data.frame(agent_attr)
-    colnames(agent_attr) <- object_name_vector
-  }
+  agent_attr <- .shape_agent_attr(agent_attr_subst = agent_attr_subst)
+
   ## ca: リストの形に揃える
   ### Nullの場合
   if(is.null(ca)){
-    if(is.null(agent_location)){
-      # agent_locationにもデータがない場合
       ca <- list(matrix(0, agent_n, agent_n))
       names(ca) <- "ca"
-    }else{
-      # agent_locationには何らかのデータがある場合
-      if(is.list(agent_location)){
-        ca <- vector("list", length(agent_location))
-        names(ca) <- paste0("ca", 1:length(agent_location))
-      }else{
-        ca <- vector("list", 1)
-        names(ca) <- "ca"
-      }
-    }
   }else if(is.data.frame(ca)){
     object_name_ca <- substitute(ca)
     if(class(object_name_ca)=="call"){
       object_name_ca <- deparse(object_name_ca)
     }else{
-        object_name_ca <- as.character(object_name_ca)
+      object_name_ca <- as.character(object_name_ca)
     }
     ca <- list(as.matrix(ca))
     names(ca) <- object_name_ca
   }else if(is.matrix(ca)){
     ### matrixの場合
+    object_name_ca <- as.character(substitute(ca))
+    ca <- list(ca)
+    names(ca) <- object_name_ca
+  }else if(is.array(ca)){
+    ### arrayの場合
     object_name_ca <- as.character(substitute(ca))
     ca <- list(ca)
     names(ca) <- object_name_ca
@@ -162,40 +148,6 @@ setABM_ca <- function(
   ### 名前を付ける(ついていない場合)
   if(is.null(names(ca))){
     names(ca) <- paste0("ca", 1:length(ca))
-  }
-
-  ## agent_location
-  if(is.null(agent_location)){
-    # agent_location: NULLの時
-    m <- length(ca)
-    agent_location <- vector(mode = "list", m)
-    for(k in 1:m){
-      agent_location[[k]] <- sample(1:(nrow(ca[[k]])*ncol(ca[[k]])), size = agent_n, replace = FALSE)
-      ca[[k]][agent_location[[k]]] <- 1:agent_n
-    }
-  }else{
-    # agent_locationに入力はある場合
-    if(is.integer(agent_location)){
-      # vectorの場合
-      m <- length(ca)
-      for(k in 1:m){
-        ca[[k]][agent_location] <- 1:agent_n
-      }
-    }else if(is.data.frame(agent_location)){
-      # data.frameの場合
-      m <- length(ca)
-      if(ncol(agent_location)!=m){warnings("Number of the columns in agent_location does not match with the number of ca.")}
-      for(k in 1:m){
-        ca[[k]][agent_location[ ,k]] <- 1:agent_n
-      }
-    }else{
-      warnings("ca is overwritten by agent_location. Make sure if this is your intention.")
-      m <- length(ca)
-      if(is.list(agent_location)==FALSE){agent_location <- list(agent_location)}
-      for(k in 1:m){
-        ca[[k]] <- agent_location[[k]]
-      }
-    }
   }
 
   ## agent_f:
@@ -269,7 +221,7 @@ setABM_ca <- function(
   # node_attribute, networkがnと整合するかをテスト-------
   ## node_attrとn
   if(!is.null(agent_attr)){
-    stopifnot(nrow(agent_attr)==agent_n)
+    stopifnot(NROW(agent_attr)==agent_n)
   }
 
   ## IDを付与する----------------------------
@@ -288,29 +240,10 @@ setABM_ca <- function(
   ### フィールドの空の入れ物を作成
   #### agent
   field_agent_attr <- vector("list", length = num_agent_attr)
-  names(field_agent_attr) <- c(names(agent_attr), "f_label")
+  names(field_agent_attr) <- c(colnames(agent_attr), "f_label")
   field_agent_ca <- vector("list", length = num_agent_ca)
   names(field_agent_ca) <- names(ca)
-
-  ## アクティブフィールドの前準備をする----------
-  ### agent location in ca
-  f_agent_ca_address <- function(env = D$stage$ca$.__enclos_env__){
-    which(env$self[[ca_name]]==self$ID)
-  }
-  f_agent_ca_rowcol <- function(env = D$stage$ca$.__enclos_env__){
-    which(env$self[[ca_name]]==self$ID, arr.ind = TRUE)
-  }
-  active_agent_ca_address <- vector("list", num_agent_ca)
-  names(active_agent_ca_address) <- paste0(names(ca), "_adr")
-  active_agent_ca_rowcol <- vector("list", num_agent_ca)
-  names(active_agent_ca_rowcol) <- paste0(names(ca), "_rc")
-
-  for(i in 1:num_agent_ca){
-    active_agent_ca_address[[i]] <- f_agent_ca_address
-    body(active_agent_ca_address[[i]])[[2]][[2]][[2]][[3]] <- names(ca)[i]
-    active_agent_ca_rowcol[[i]] <- f_agent_ca_rowcol
-    body(active_agent_ca_rowcol[[i]])[[2]][[2]][[2]][[3]] <- names(ca)[i]
-  }
+  field_agent_ca <- rev(field_agent_ca)  # なぜかR6をインスタンス化すると順番が逆になるため
 
   ### R6 classを作る
   #### Agentクラス
@@ -331,31 +264,14 @@ setABM_ca <- function(
         }
         # f_label
         cat("f_label: ", self$a$f_label, "\n", sep = "")
-        # agent_ca
-        for(m in 1:length(ca)){
-          temp <- self[[names(active_agent_ca_address)[m]]]
-          cat(paste0(names(active_agent_ca_address)[m], ":"),
-              temp, "\n", sep = " ")
-          }
       }),
-    active = c(active_agent_ca_address, active_agent_ca_rowcol),
     lock_objects = F, cloneable = T)
 
-  # stageの各R6クラス
+  # caのR6クラス
   ## agent_network
   ca_stage_ca <- R6::R6Class(
     "ca_stage_ca",
-    public = c(field_agent_ca,
-               print = function(...){
-                 # agent network
-                 for(m in 1:length(ca)){
-                   temp <- self[[names(ca)[m]]]
-                   cat(paste0("$", names(ca)[m]),"\n")
-                   print(temp)
-                   cat("\n")
-                 }
-               }
-    ),
+    public = c(field_agent_ca),
     lock_objects = F, cloneable = T)
 
   ## Dとして入れ物を用意し、IDを貼り付ける
@@ -368,7 +284,7 @@ setABM_ca <- function(
   }
 
   ## stage:agent network
-  D$stage$ca <- ca_stage_ca$new()
+  D$ca <- ca_stage_ca$new()
 
   # Agentの情報付与----------------------------------
   ## 当該agentのメタ情報を付与する
@@ -389,10 +305,14 @@ setABM_ca <- function(
       }
     }
   }
-
   ## stageに各情報を付与する---------------------------
+  ca_temp_name <- names(field_agent_ca)
   for(i in 1:length(field_agent_ca)){
-    D$stage$ca[[names(field_agent_ca)[i]]] <- as(ca[[i]], "sparseMatrix")
+    if(length(ca[[ca_temp_name[i]]])>=3){
+      D$ca[[ca_temp_name[i]]] <- ca[[ca_temp_name[i]]]
+    }else{
+      D$ca[[ca_temp_name[i]]] <- as(ca[[ca_temp_name[i]]], "sparseMatrix")
+    }
   }
 
   # DATAオブジェクトを返す---------------------

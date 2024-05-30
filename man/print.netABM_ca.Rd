@@ -4,7 +4,7 @@
 \alias{print.netABM_ca}
 \title{Printing the netABM_ca class}
 \usage{
-print.netABM_ca(D)
+\method{print}{netABM_ca}(D)
 }
 \arguments{
 \item{D}{A netABM_ca object}
@@ -14,7 +14,7 @@ Printing the netABM_ca class
 }
 \examples{
 D <- setABM_ca(agent_n = 5)
-print.netABM_network(D)
+print.netABM_ca(D)
 
 print(D)    # do the same
 }

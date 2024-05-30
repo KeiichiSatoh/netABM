@@ -1,12 +1,14 @@
 #' @title Printing the netABM_spatNetwork class
 #' @param D A netABM_spatNetwork object
+#' @method print netABM_spatNetwork
 #' @export
 #' @examples
 #'
 #' D <- setABM_spatNetwork(agent_n = 5, place_n = 10)
 #' print.netABM_spatNetwork(D)
+#' print(D)
 #'
-#' print(D)    # do the same
+#' D    # do the same
 
 print.netABM_spatNetwork <- function(D){
   cat("agent:", "\n")

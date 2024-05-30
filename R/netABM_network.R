@@ -1,18 +1,15 @@
-#' @title netABM_network framework
-#' @param D A netABM_netork object
+#' @title netABM_network
+#' @param D A netABM_network object
 #' @export
-#' @examples
-#' mat <- sna::rgraph(5)
-#' D <- setABM_network(agent_n = 5, agent_network = mat)
-#' print.netABM_network(D)
-#'
-#' print(D)    # do the same
-netABM_network <- function(x, ...){
+netABM_network <- function(D){
   UseMethod("netABM_network")
 }
 
+#' print.netABM_network - Print Method for netABM_network
+#'
+#' @param D A netABM_network object
+#' @method print netABM_network
 #' @export
-#' @rdname netABM_network
 print.netABM_network <- function(D){
   cat("agent:", "\n")
   cat("  Number of Agents     :", length(D$agent), "\n")
