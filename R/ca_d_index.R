@@ -1,7 +1,26 @@
-
-d <- ca_d_index(CA = agrD$room_by_ethnicity, zone = agrD$zone, with_zone_level = TRUE)
-d$d_by_zone
-
+#' @title Calculate the Index of dissimilarity (D-index) of CA
+#' @description This function calculates the D-index,
+#' which is a measure of segregation given cross-tabulated data for multiple zones and groups.
+#'
+#' @param CA A matrix/array or a list of them representing the cellular automaton wherein each entry is coded with the group attribute.
+#' @param zone A matrix/array or a list of them representing the zones.
+#' @param CA_exclude_value Values in CA to be excluded from the calculation (default is \code{0}).
+#' @param with_zone_level Logical, if \code{TRUE}, the function returns D index for each zone in addition to the global D-index (default is \code{FALSE}).
+#'
+#' @return If \code{with_zone_level} is \code{TRUE}, a list with two elements:
+#'   \describe{
+#'     \item{d}{The D index.}
+#'     \item{d_by_zone}{The D index by zone.}
+#'   }
+#'   Otherwise, returns the D index.
+#'
+#' @examples
+#' \dontrun{
+#' d <- ca_d_index(CA = agrD$room_by_ethnicity, zone = agrD$zone, with_zone_level = TRUE)
+#' d$d_by_zone
+#' }
+#'
+#' @export
 ca_d_index <- function(
     CA, zone, CA_exclude_value = 0, with_zone_level = FALSE){
   # CAのインプットを整える
@@ -60,4 +79,5 @@ ca_d_index <- function(
   }
   out
 }
+
 

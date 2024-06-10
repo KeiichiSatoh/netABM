@@ -2,14 +2,51 @@
 % Please edit documentation in R/agrABM_ca.R
 \name{agrABM_ca}
 \alias{agrABM_ca}
-\title{agrD <- agrABM_ca(D)
-agrD <- agrABM_ca(D, from_log = TRUE, attr_long = FALSE)
-agrD <- agrABM_ca(D, from_log = TRUE, attr_long = TRUE)}
+\title{Aggregate the CA and attributes from the ABM data}
 \usage{
 agrABM_ca(D, from_log = FALSE, by_element = FALSE, attr_long = FALSE)
 }
+\arguments{
+\item{D}{A \code{netABM} class objectxto be processed.}
+
+\item{from_log}{A logical value indicating whether to extract data from the log \code{TRUE} or directly from the current state \code{FALSE}. Default is \code{FALSE}.}
+
+\item{by_element}{A logical value that, when \code{from_log} is \code{TRUE}, specifies whether to group data by individual elements \code{TRUE} or by time points \code{FALSE}. Default is \code{FALSE}.}
+
+\item{attr_long}{A logical value that, when \code{from_log} is \cpde{TRUE} and \cpde{by_element} is \code{TRUE}, specifies whether to extract attributes in a long format \code{TRUE} or not \code{FALSE}. Default is \code{FALSE}.}
+}
+\value{
+A list containing the extracted attributes and CA components. The structure of the list depends on the specified parameters:
+\itemize{
+\item If \code{from_log} is \code{FALSE}, the list contains the current attributes and CA components.
+\item If \code{from_log} is \code{TRUE} and \code{by_element} is \code{FALSE}, the list contains sublists for each time point in the log.
+\item If \code{from_log} is \code{TRUE} and \code{by_element} is \code{TRUE}, the list contains data grouped by individual elements, with attributes optionally in a long format.
+}
+}
 \description{
-agrD <- agrABM_ca(D)
-agrD <- agrABM_ca(D, from_log = TRUE, attr_long = FALSE)
-agrD <- agrABM_ca(D, from_log = TRUE, attr_long = TRUE)
+The \code{agrABM_ca} function processes a given data object \code{D} to extract and
+organize its attributes and cellular automata (CA) components.
+It provides different methods of extracting these components based on the specified parameters.
+}
+\details{
+The function processes the data object \code{D} and extracts its attributes and CA components. The behavior of the function changes based on the values of \code{from_log} and \code{by_element}
+parameters:
+\itemize{
+\item When \code{from_log} is \code{FALSE}, the function extracts the current attributes and CA components directly from \code{D}.
+\item When \code{from_log} is \code{TRUE}:
+\itemize{
+\item If \code{by_element} is \code{FALSE}, the function extracts data for each time point in the log, organizing the output by time.
+\item If \code{by_element} is \code{TRUE}, the function organizes the data by elements, optionally using a long format for attributes if \code{attr_long} is \code{TRUE}.
+}
+}
+}
+\examples{
+\dontrun{
+# Example usage of agrABM_ca function
+result <- agrABM_ca(D = some_data_object, from_log = FALSE, by_element = FALSE, attr_long = FALSE)
+}
+
+}
+\seealso{
+\code{\link{get_attr}} for the helper function used within \code{agrABM_ca} to extract attributes from the data object.
 }

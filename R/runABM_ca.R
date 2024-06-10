@@ -1,8 +1,8 @@
 #' @title Run the simulation based on the netABM_ca object
 #' @description
-#' \code{runABM_spatNetwork} let agents their action defined by \code{.} in the
-#' \code{netABM_spatNetwork} object.
-#' @param D a \code{netABM_spatNetwork} class object.
+#' \code{runABM_ca} let agents their action defined by \code{agent_f} in the
+#' \code{netABM_ca} object.
+#' @param D a \code{netABM_ca} class object.
 #' @param .stopCondition A user-defined or built-in function object that
 #' determines when the simulation to stop.
 #' The default value \code{NULL} will result in running one simulation.
@@ -12,8 +12,8 @@
 #' @param save_log logical; if the log of each run should be saved.
 #' The default is \code{FALSE}.
 #' @details
-#' \code{runAgent_spatNetwork} is a simulator based on \code{netABM_spatNetwork} object (D).
-#' In each run the selected agents act their action defined \code{.f} of \code{netABM_spatNetwork}
+#' \code{runAgent_ca} is a simulator based on \code{netABM_ca} object (D).
+#' In each run the selected agents act their action defined \code{.f} of \code{netABM_ca}
 #' object.
 #'
 #' Because the counting system of \code{R} starts from 1, \code{runABM} counts
@@ -24,10 +24,10 @@
 #' The first way is to write the user's own function.
 #' Upon writing an original function, be sure to set \code{D} as the first argument without any default;
 #' otherwise agent's action does not reflect dynamically to the changing \code{D} object during the simulation.
-#' \code{self} is a reserved for indicating the agent themselves.
+#'
 #' In addition, each function should returns the following value:
-#' #' - \code{.stopCondition}: Returns \code{TRUE} if the condition of \code{D} reaches the desired condition
-#' - \code{.selectAgent}: Returns the character vector of the agent IDs (e.g., \code{"A1"}, \code{"A2"}...)
+#' - \code{.stopCondition}: Returns \code{TRUE} if the condition of \code{D} reaches the desired condition
+#' - \code{.selectAgent}: Returns the character vector of the agent IDs (e.g., \code{"1"}, \code{"2"}...)
 #' In addition, be sure to write the function in such a way that it takes \code{D} as the first argument without any default value.
 #'
 #' The second way is to use a built-in function of this package.
@@ -36,27 +36,31 @@
 #' Second, if user wants to modify some argument, supply it as a form: \code{function_name(x = a new value)}.
 #' See the examples below.
 #'
-#' @returns  a \code{netABM_spatNetwork} class object
+#' @returns  a \code{netABM_ca} class object
 #' @family runABM
 #' @author Keiichi Satoh
-#' @importFrom R6 R6Class
 #' @importFrom rlang parse_expr
 #' @importFrom rlang call_name
 #' @importFrom rlang call_args
 #' @import Matrix
+#' @import R6
 #' @export
 #' @examples
-#' # Example
+#' # Initiate the CA
+#' ca1 <- init_ca(agent_n = 5, dim = c(3,3))
+#'    # Difine the agent behavior
 #' move_to_vacant_place <- function(D){
-#'   D$stage$ca$ca[self$ca_adr] <- 0
-#'   vacant_place <- which(D$stage$ca$ca == 0)
-#'   D$stage$ca$ca[sample(vacant_place, 1)] <- self$ID
-#' }
-#' D <- setABM_ca(agent_n = 5,  agent_f = move_to_vacant_place)
-#' D$stage$ca$ca
-#' D <- runABM_ca(D = D, save_log = TRUE)
-#' D$log$t1$stage$ca$ca
-#' D$log$t2$stage$ca$ca
+#'   vacant_places <- which(D$ca$ca1==0)
+#'   place_to_move <- sample(vacant_places, size = 1)
+#'   ca_move(D, ID = self$ID, where_to = place_to_move)}
+# set the netABM_ca class
+#' D <- setABM_ca(agent_n = 5, ca = ca1, agent_f = move_to_vacant_place)
+# Run the simulation
+#' D <- runABM_ca(D, .stopCondition = stopABM_times(simTimes = 2), save_log = TRUE)
+#' # View the result
+#' D$log$t1$ca$ca1   # Time 1 (The initial place)
+#' D$log$t2$ca$ca1   # Time 2
+#' D$log$t3$ca$ca1   # Time 3
 
 runABM_ca <- function(D,
                       .stopCondition = NULL,

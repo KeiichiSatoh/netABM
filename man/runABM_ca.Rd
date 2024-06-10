@@ -7,7 +7,7 @@
 runABM_ca(D, .stopCondition = NULL, .selectAgent = NULL, save_log = FALSE)
 }
 \arguments{
-\item{D}{a \code{netABM_spatNetwork} class object.}
+\item{D}{a \code{netABM_ca} class object.}
 
 \item{.stopCondition}{A user-defined or built-in function object that
 determines when the simulation to stop.
@@ -21,15 +21,15 @@ selecting all agents, meaning that all agents do their action each time.}
 The default is \code{FALSE}.}
 }
 \value{
-a \code{netABM_spatNetwork} class object
+a \code{netABM_ca} class object
 }
 \description{
-\code{runABM_spatNetwork} let agents their action defined by \code{.} in the
-\code{netABM_spatNetwork} object.
+\code{runABM_ca} let agents their action defined by \code{agent_f} in the
+\code{netABM_ca} object.
 }
 \details{
-\code{runAgent_spatNetwork} is a simulator based on \code{netABM_spatNetwork} object (D).
-In each run the selected agents act their action defined \code{.f} of \code{netABM_spatNetwork}
+\code{runAgent_ca} is a simulator based on \code{netABM_ca} object (D).
+In each run the selected agents act their action defined \code{.f} of \code{netABM_ca}
 object.
 
 Because the counting system of \code{R} starts from 1, \code{runABM} counts
@@ -40,11 +40,11 @@ For setting \code{.stopCondition} and \code{.selectAgent} condition, there are t
 The first way is to write the user's own function.
 Upon writing an original function, be sure to set \code{D} as the first argument without any default;
 otherwise agent's action does not reflect dynamically to the changing \code{D} object during the simulation.
-\code{self} is a reserved for indicating the agent themselves.
+
 In addition, each function should returns the following value:
-#' - \code{.stopCondition}: Returns \code{TRUE} if the condition of \code{D} reaches the desired condition
 \itemize{
-\item \code{.selectAgent}: Returns the character vector of the agent IDs (e.g., \code{"A1"}, \code{"A2"}...)
+\item \code{.stopCondition}: Returns \code{TRUE} if the condition of \code{D} reaches the desired condition
+\item \code{.selectAgent}: Returns the character vector of the agent IDs (e.g., \code{"1"}, \code{"2"}...)
 In addition, be sure to write the function in such a way that it takes \code{D} as the first argument without any default value.
 }
 
@@ -55,17 +55,19 @@ Second, if user wants to modify some argument, supply it as a form: \code{functi
 See the examples below.
 }
 \examples{
-# Example
+# Initiate the CA
+ca1 <- init_ca(agent_n = 5, dim = c(3,3))
+   # Difine the agent behavior
 move_to_vacant_place <- function(D){
-  D$stage$ca$ca[self$ca_adr] <- 0
-  vacant_place <- which(D$stage$ca$ca == 0)
-  D$stage$ca$ca[sample(vacant_place, 1)] <- self$ID
-}
-D <- setABM_ca(agent_n = 5,  agent_f = move_to_vacant_place)
-D$stage$ca$ca
-D <- runABM_ca(D = D, save_log = TRUE)
-D$log$t1$stage$ca$ca
-D$log$t2$stage$ca$ca
+  vacant_places <- which(D$ca$ca1==0)
+  place_to_move <- sample(vacant_places, size = 1)
+  ca_move(D, ID = self$ID, where_to = place_to_move)}
+D <- setABM_ca(agent_n = 5, ca = ca1, agent_f = move_to_vacant_place)
+D <- runABM_ca(D, .stopCondition = stopABM_times(simTimes = 2), save_log = TRUE)
+# View the result
+D$log$t1$ca$ca1   # Time 1 (The initial place)
+D$log$t2$ca$ca1   # Time 2
+D$log$t3$ca$ca1   # Time 3
 }
 \seealso{
 Other runABM: 

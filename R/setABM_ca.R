@@ -4,21 +4,16 @@
 #' @param agent_n integer. Number of agents
 #' @param agent_attr vector/data.frame/list of attributes of agents (default: \code{NULL})
 #' @param agent_f a user-defined or built-in function object or list of them representing agent's actions.
-#' @param agent_location vector, data.frame, matrix or list of agent location.
-#' See the details for how to create each type of location object. The default \code{NULL} will allocate
-#' each agents randomly to each place.
-#' @param ca A matrix or list of matrices of cellular automaton. The default \code{NULL} will result in creating a
-#' \code{agent_n}*\code{agent_n} square matrix except for the case that \code{agent_location} is provided as a matrix or list format:
-#' In such case \code{ca} is overwritten by \code{agent_location}.
+#' @param ca A matrix/array or list of matrices/arrays of cellular automaton. The default \code{NULL} will result in creating a
+#' \code{agent_n}*\code{agent_n} square matrix.
 #'
 #' @details
-#' \code{setAgent_cax} is a constructor of \code{netABM_cax} object (D)
-#' which has \code{agent}, \code{stage}, \code{time}(set as 1), and \code{log} (set as NA)
+#' \code{setAgent_cax} is a constructor of \code{netABM_ca} object (D)
+#' which has \code{agent}, \code{ca}, \code{time}(set as 1), and \code{log} (set as NA)
 #' as a list format.
 #' Each agent in the \code{agent} has their attribute listed under \code{a} (i.e. "attributes"),
-#' the current location of the agent in the CA, and the action as \code{.f} (i.e., "function").
-#' The each agent under \code{agent} and \code{ca} under \code{stage} are \code{R6} class objects from package \code{R6}.
-#' Object \code{D} also has a class \code{netABM} which is the parent class of \code{netABM_ca}.
+#' and the action as \code{.f} (i.e., "function").
+#' The each agent under \code{agent} and \code{ca} are \code{R6} class objects from package \code{R6}.
 #'
 #' Each agent automatically get its \code{ID} and \code{f_label} and store them as their attributes.
 #' The latter \code{f_label} is taken from the supplied object name of \code{agent_f}.
@@ -41,67 +36,45 @@
 #' For getting the ideas more concretely about how to supply a function to \code{agent_f},
 #' see the examples below.
 #'
-#' There are several options for setting \code{agent_location}. The simplest way is
-#' supplying it as vector. For example, c(1,5,4) defines that first, second and third agent locate at first, fifth, and
-#' fourth place, respectively. If users supplies agent_location as data.frame, each column will be
-#' treated as a different dimension of location information. (e.g., location of living and location of working.)
-#' Furthermore, users can also define agent places with a matrix wherein a agent's ID is directly placed at CA(s).
-#'
-#' Agent's location in the CA can be got in two ways. Agent's ca_adr indicates the address of the location in the CA.
-#' The address in the CA is allocated in the order of the upper-left cell to right-bottom corner.
-#' Agent's ca_rc indicates the agent's location as the row-column format in the CA matrix.
+#' Upon supplying the \code{ca}, each entry number in a CA matrix/array must represent
+#' the agent IDs, if users want to let agent interact with the CA (e.g. letting agent move on the CA),
+#' because each agent identify their location based on their ID. (Of course, if
+#' the user does not intend to use the CA in that way, it is fine to set the number freely.)
 #'
 #' @returns  a \code{netABM_ca} class object D (see Details)
 #' @family setABM
 #' @author Keiichi Satoh
-#' @importFrom R6 R6Class
 #' @importFrom rlang parse_expr
 #' @importFrom rlang call_name
 #' @importFrom rlang call_args
+#' @import R6
 #' @import Matrix
 #' @export
 #' @examples
 #' # Data for the agent attributes and agent behavior
-#'agent_attr <- data.frame(
-#'  age = c(0, 1, 2, 3, 4),
-#'  sex = c("m","m","m","f","f"))
-#' move_to_agr1 <- function(D){
-#'  D$stage$ca$ca[self$ca_adr] <- 0
-#'  D$stage$ca$ca[1] <- self$ID
-#'}
+#' agent_attr <- data.frame(
+#'   age = c(0, 1, 2, 3, 4),
+#'   sex = c("m","m","m","f","f"))
+#'
+#' # A very simple behavior: agent simply tries to move to the location 1 in the CA
+#'  move_to_1 <- function(D){
+#'    ca_move(D = D, ID = self$ID, where_to = 1)}
 #'
 #' # Example 1: A simple example
-#' set.seed(seed = 2)
-#' D <- setABM_ca(agent_n = 5, agent_attr = agent_attr, agent_f = move_to_agr1)
-#' D$stage$ca$ca          # Agent 1 locates at the upper-right corner
+#' set.seed(seed = 3)
+#' ca1 <- init_ca(agent_n = 5, dim = c(5,5))
+#' D <- setABM_ca(agent_n = 5,
+#'                agent_attr = agent_attr,
+#'                agent_f = move_to_1,
+#'                ca = ca1)
+#'
+#' # print the state of art of D
+#' print(D)
+#'
+#' # Letting the agent A1 to move
+#' D$ca$ca1               # Agent 1 locates at the bottom-left corner
 #' D$agent$A1$.f(D)       # Agent 1's action to move to 1
-#' D$stage$ca$ca          # Agent 1 now locates at the upper-left corner
-#'
-#' # Example 2: setting the agent's location manually using the vector
-#' # that indicates the location of the each agent's address.
-#' D <- setABM_ca(agent_n = 5, agent_attr = agent_attr,
-#'               agent_f = move_to_agr1, agent_location = 1:5)
-#' D$stage$ca$ca          # Agent 1 locates at the upper-right corner
-#'
-#' # Example 3: setting the agent's location manually using the ca matrix.
-#' ca_mat <- matrix(0, 4, 5)
-#' ca_mat[1,] <- 1:5
-#' D <- setABM_ca(agent_n = 5, agent_attr = agent_attr,
-#'               agent_f = move_to_agr1, agent_location = ca_mat)
-#' D$stage$ca$ca          # Agent 1 locates at the upper-right corner
-#'
-#' # Example 4: setting the multiple CAs agent's location manually using the ca matrix.
-#' ca_mat1 <- matrix(0, 4, 5)
-#' ca_mat1[1,] <- 1:5
-#' ca_mat2 <- t(ca_mat1)
-#' D <- setABM_ca(agent_n = 5, agent_attr = agent_attr,
-#'               agent_f = move_to_agr1, agent_location = list(ca_mat1, ca_mat2))
-#'
-#' # Example 5: setting the size of CA and let agents locate randomly.
-#' ca1 <- matrix(0, nrow = 5, ncol = 6)
-#' D <- setABM_ca(agent_n = 5, agent_attr = agent_attr,
-#'               agent_f = move_to_agr1, ca = ca1)
-
+#' D$ca$ca1               # Agent 1 locates at the bottom-left corner
 
 setABM_ca <- function(
     agent_n,
