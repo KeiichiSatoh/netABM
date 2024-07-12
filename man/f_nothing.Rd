@@ -4,7 +4,7 @@
 \alias{f_nothing}
 \title{Agent does nothing}
 \usage{
-f_nothing(D)
+f_nothing()
 }
 \arguments{
 \item{D}{The D object. Note that this argument is internally supplied within

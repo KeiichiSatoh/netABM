@@ -37,7 +37,6 @@ Other ca_tools:
 Other f_tools: 
 \code{\link{ca_move}()},
 \code{\link{calc_softmax}()},
-\code{\link{get_attr}()},
 \code{\link{get_ca_loc}()}
 }
 \author{

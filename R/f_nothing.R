@@ -20,5 +20,4 @@
 #' setABM_network(n = 5,
 #'                .act = actAgent_nothing)
 
-f_nothing <- function(D){NULL}
-
+f_nothing <- function(){return(NULL)}

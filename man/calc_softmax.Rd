@@ -65,7 +65,6 @@ choose_softmax(Y ~ X1 * X2, data = dat, standardize = FALSE, n = 2)
 Other f_tools: 
 \code{\link{ca_2d_to_3d}()},
 \code{\link{ca_move}()},
-\code{\link{get_attr}()},
 \code{\link{get_ca_loc}()}
 }
 \author{

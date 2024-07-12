@@ -72,11 +72,6 @@ D$stage$location
 D <- runABM_spatNetwork(D = D, save_log = TRUE)
 D$stage$location
 }
-\seealso{
-Other runABM: 
-\code{\link{runABM_ca}()},
-\code{\link{runABM_network}()}
-}
 \author{
 Keiichi Satoh
 }

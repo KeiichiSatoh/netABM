@@ -57,8 +57,7 @@ Other ca_tools:
 Other f_tools: 
 \code{\link{ca_2d_to_3d}()},
 \code{\link{ca_move}()},
-\code{\link{calc_softmax}()},
-\code{\link{get_attr}()}
+\code{\link{calc_softmax}()}
 }
 \author{
 Keiichi Satoh
