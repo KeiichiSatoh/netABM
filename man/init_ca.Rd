@@ -33,7 +33,7 @@ A matrix or an array representing the initialized cellular automaton.
 }
 \description{
 This function creates a matrix or array as Cellular Automaton object
-that can be used as an input of \code{setABM_ca}.
+that can be used as an input of \code{setABM}.
 }
 \details{
 This function creates a matrix or an array based on the specified dimensions

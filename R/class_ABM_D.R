@@ -10,6 +10,7 @@
 #' @examples
 #' ABM_D$new()
 #' @export
+#'
 
 ABM_D <- R6Class(
   "ABM_D",
@@ -42,22 +43,62 @@ ABM_D <- R6Class(
       cat("\n")
       cat("[field]", "\n")
       if(length(field_type[field_type=="net"])>0){
-      cat("  net  :", names(field_type[field_type=="net"]), "\n")
+        cat("  net  :", names(field_type[field_type=="net"]), "\n")
       }
       if(length(field_type[field_type=="ca"])>0){
-      cat("  ca   :", names(field_type[field_type=="ca"]), "\n")
+        cat("  ca   :", names(field_type[field_type=="ca"]), "\n")
       }
       if(length(field_type[field_type=="euc"])>0){
-      cat("  euc  :", names(field_type[field_type=="euc"]), "\n")
+        cat("  euc  :", names(field_type[field_type=="euc"]), "\n")
       }
       if(length(field_type[field_type=="other"])>0){
-      cat("  other:", names(field_type[field_type=="other"]), "\n")
+        cat("  other:", names(field_type[field_type=="other"]), "\n")
       }
       cat("\n")
       cat("[meta data]", "\n")
       cat("  time :", self$time, "\n")
       cat("  log  :", if(all(is.na(self$log))){"NULL"}else{length(self$log)}, "\n")
       cat("  notes:", names(self$notes), "\n")
+    },
+    #' @description
+    #' get the field type of the \code{ABM_D} class
+    .field_type = function(){
+      unlist(lapply(self, function(X){attr(X, "field_type")}))
+    },
+    #' @description
+    #' get the attribute of the agents in \code{ABM_D} class
+    #' @param from_log logical. If the attribute is retrieved from log.
+    #' @param attr_long logical. If the attribute from the log is converted into the long format.
+    .agent_attr = function(from_log = FALSE, attr_long = FALSE){
+      attr <- names(self$agent[[1]])[!names(self$agent[[1]]) %in% c(".__enclos_env__", "clone", ".f",".save","print")]
+      if(from_log==FALSE){
+        d <- do.call(
+          data.frame,
+          lapply(attr, function(X){
+            sapply(1:length(self$agent), function(i){self$agent[[i]][[X]]})
+          }))
+        colnames(d) <- attr
+      }else{
+        d <- lapply(1:length(self$log), function(t){
+          d_t <- do.call(
+            data.frame,
+            lapply(attr, function(X){
+              sapply(1:length(self$agent), function(i){self$log[[t]]$agent[[i]][[X]]})
+            }))
+          colnames(d_t) <- attr
+          d_t
+          })
+        if(attr_long==FALSE){
+          names(d) <- names(self$log)
+        }else{
+          d <- lapply(1:length(d), function(t){
+            data.frame(d[[t]], time = t)
+            })
+          d <- do.call(rbind, d)
+        }
+      }
+      # output
+      d
     }
   ),
   private = list(

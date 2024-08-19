@@ -105,48 +105,92 @@ setABM <- function(
     time = NULL,
     notes = NULL,
     init = list(agent_n = NULL, agent_attr = NULL, agent_f = NULL,
-                net = NULL, ca = NULL, euc = NULL,
-                other_field = NULL, log = NULL, time = NULL, notes = NULL)){
-
+                net = NULL, ca =NULL, euc = NULL,
+                other_field = NULL, log = NULL,
+                time = NULL, notes = NULL)){
   # インプットの形態を確認する------------
-  ## agent_n: 数値データであることを確認
+  ## agent_n
+  if(!is.null(init$agent_n)){agent_n <- init$agent_n}
+  ## 数値データであることを確認
   stopifnot("agent_n must be numeric." = is.numeric(agent_n))
+
   ## agent_attr
-  agent_attr_sbs <- substitute(agent_attr)
-  agent_attr_list <- .shape_agent_attr(agent_attr_sbs = agent_attr_sbs, agent_n = agent_n)
-  if(any(colnames(agent_attr_list)=="ID")){
-    colnames(agent_attr_list)[which(colnames(agent_attr_list)=="ID")] <- "user_ID"
+  if(!is.null(init$agent_attr)){
+    agent_attr <- init$agent_attr
+    agent_attr_sbs <- substitute(agent_attr)
+  }else{
+    agent_attr_sbs <- substitute(agent_attr)
   }
+  agent_attr <- .shape_agent_attr(agent_attr_sbs = agent_attr_sbs, agent_n = agent_n)
+  if(any(colnames(agent_attr)=="ID")){
+    colnames(agent_attr)[which(colnames(agent_attr)=="ID")] <- "user_ID"
+  }
+
   ## agent_f
-  agent_f_sbs <- substitute(agent_f)
+  if(!is.null(init$agent_f)){
+    agent_f <- init$agent_f
+    agent_f_sbs <- substitute(agent_f)
+  }else{
+    agent_f_sbs <- substitute(agent_f)
+  }
   agent_f_list <- .shape_agent_f(agent_f_sbs = agent_f_sbs, agent_n = agent_n)
-  ## agent_f_listの冒頭にselfIDを挿入する
+  ## agent_f_listの冒頭にself <- selfを挿入する
   agent_f_list <- lapply(agent_f_list, .insert_line_to_function)
+
   ## net
-  net_sbs <- substitute(net)
+  if(!is.null(init$net)){
+    net <- init$net
+    net_sbs <- substitute(net)
+  }else{
+    net_sbs <- substitute(net)
+  }
   net <- .shape_net(net_sbs = net_sbs, agent_n = agent_n)
+
   ## ca
-  ca_sbs <- substitute(ca)
+  if(!is.null(init$ca)){
+    ca <- init$ca
+    ca_sbs <- substitute(ca)
+  }else{
+    ca_sbs <- substitute(ca)
+  }
   ca <- .shape_ca(ca_sbs = ca_sbs, agent_n = agent_n)
+
   ## euc
-  euc_sbs <- substitute(euc)
+  if(!is.null(init$euc)){
+    euc <- init$euc
+    euc_sbs <- substitute(euc)
+  }else{
+    euc_sbs <- substitute(euc)
+  }
   euc <- .shape_euc(euc_sbs = euc_sbs, agent_n = agent_n)
+
   ## other_field
-  other_field_sbs <- substitute(other_field)
+  if(!is.null(init$other_field)){
+    other_field <- init$other_field
+    other_field_sbs <- substitute(other_field)
+  }else{
+    other_field_sbs <- substitute(other_field)
+  }
   other_field <- .shape_other_field(other_field_sbs = other_field_sbs)
+
   ## log
+  if(!is.null(init$log)){log <- init$log}
   if(is.null(log)){
     log <- NA
   }else{
     log <- log
   }
+
   ## time
+  if(!is.null(init$time)){time <- init$time}
   if(is.null(time)){
     time <- 1
   }else{
     time <- time
   }
+
   ## notes
+  if(!is.null(init$notes)){notes <- init$notes}
   if(is.null(notes)){
     notes <- NULL
   }else{

@@ -4,16 +4,23 @@
 \alias{ca_move}
 \title{Move an Agent in a Cellular Automaton (CA)}
 \usage{
-ca_move(D, ID, where_to, which_ca = 1)
+ca_move(which_ca = NULL, where_to, ID = NULL, D = NULL)
 }
 \arguments{
-\item{D}{A \code{netABM_ca} class object set by \code{setABM_ca} function.}
+\item{which_ca}{A name specifying which CA to use from the \code{D}.
+The Default is \code{NULL}, resulting in selecting the first CA found by
+\code{D$.field_type()} method.}
 
-\item{ID}{The ID of the agent to be moved.}
+\item{where_to}{An integer of vector index or matrix of array index
+specifying the new location for the agent within the CA.}
 
-\item{where_to}{An integer specifying the new location for the agent within the CA.}
+\item{ID}{The ID of the agent. The default \code{NULL} will result in
+selecting the current agent from the parent.frame,
+which may be the usual usage.}
 
-\item{which_ca}{An index or name specifying which CA to use from the \code{D} list. Default is \code{1}.}
+\item{D}{A \code{ABM_D} class object set by \code{setABM} function.
+The default \code{NULL} will result in selecting the \code{D} object
+from the parent.frame, which may be the usual usage.}
 }
 \value{
 The function updates the CA in place and does not return a value.
@@ -30,30 +37,43 @@ and a message is displayed. Otherwise, the agent is moved,
 and its original location is cleared.
 }
 \examples{
+# Example 1
 # prepare an example dataset
 set.seed(1)
 ca <- init_ca(dim = c(3, 3), agent_n = 5)
-D <- setABM_ca(agent_n = 5, ca = ca)
-
+D <- setABM(agent_n = 5, ca = ca)
 # ID1 locates at the place 9
-D$ca$ca
+D$ca
+ca_move(which_ca = "ca", where_to = 5, D = D, ID = 1)
+# ID1 moves to the place 5 (i.e. row = 2, col = 2)
+D$ca
 
-# ID1 moves
-ca_move(D, ID = 1, where_to = 5, which_ca = "ca")
+# Example 2: a more practical usage
 
-# ID1 now moved to the place 5
-D$ca$ca
+f <- function(){
+ ca_move(which_ca = "ca", where_to = 5)
+}
 
+set.seed(1)
+ca <- init_ca(dim = c(3, 3), agent_n = 1)
+D <- setABM(agent_n = 1, ca = ca, agent_f = f)
+D$ca
+D <- runABM(D = D)
+D$ca
 }
 \seealso{
 Other ca_tools: 
 \code{\link{ca_2d_to_3d}()},
-\code{\link{get_ca_loc}()}
+\code{\link{ca_loc}()},
+\code{\link{get_ca}()}
 
 Other f_tools: 
 \code{\link{ca_2d_to_3d}()},
+\code{\link{ca_loc}()},
+\code{\link{calc_logistic}()},
 \code{\link{calc_softmax}()},
-\code{\link{get_ca_loc}()}
+\code{\link{f_nothing}()},
+\code{\link{get_ca}()}
 }
 \concept{ca_tools}
 \concept{f_tools}

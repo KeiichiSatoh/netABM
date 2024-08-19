@@ -1,6 +1,6 @@
 #' @title Initialize a Cellular Automaton (CA)
 #' @description This function creates a matrix or array as Cellular Automaton object
-#' that can be used as an input of \code{setABM_ca}.
+#' that can be used as an input of \code{setABM}.
 #'
 #' @param data The initial value to populate the CA grid. Default is \code{0}.
 #' @param dim A vector specifying the dimensions of the CA grid.

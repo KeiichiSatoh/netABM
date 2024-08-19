@@ -49,7 +49,8 @@
 #'
 #' # Choose based on softmax probabilities
 #' choose_softmax(Y ~ X1 * X2, data = dat, standardize = FALSE, n = 2)
-#'
+#' @importFrom rlang f_rhs
+#' @importFrom rlang f_lhs
 #' @export
 
 calc_softmax <- function(formula, data = NULL, standardize = FALSE){
@@ -64,8 +65,8 @@ calc_softmax <- function(formula, data = NULL, standardize = FALSE){
                                 })
   }
   # 式を分解
-  rhf <- f_rhs(formula)
-  lhf <- f_lhs(formula)
+  rhf <- rlang::f_rhs(formula)
+  lhf <- rlang::f_lhs(formula)
   # Xを計算する
   X <- eval(rhf, envir = data)
   # softmax関数をもとに確率を計算する
@@ -89,5 +90,4 @@ choose_softmax <- function(formula, data = NULL, standardize = FALSE, n = 1){
   decision <- sample(names(p), size = n, prob = p)
   decision
 }
-
 

@@ -31,13 +31,17 @@ CA_3d <- ca_2d_to_3d(CA_2d, height = 4)
 }
 \seealso{
 Other ca_tools: 
+\code{\link{ca_loc}()},
 \code{\link{ca_move}()},
-\code{\link{get_ca_loc}()}
+\code{\link{get_ca}()}
 
 Other f_tools: 
+\code{\link{ca_loc}()},
 \code{\link{ca_move}()},
+\code{\link{calc_logistic}()},
 \code{\link{calc_softmax}()},
-\code{\link{get_ca_loc}()}
+\code{\link{f_nothing}()},
+\code{\link{get_ca}()}
 }
 \author{
 Keiichi Satoh

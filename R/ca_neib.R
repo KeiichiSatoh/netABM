@@ -1,25 +1,39 @@
 #' @title Get Neighboring Cells in a Cellular Automaton
-#' @description This function retrieves neighboring cells in a cellular automaton (CA) grid,
-#' either defined by the \code{D} object or directly specified by the \code{CA} parameter.
-#' It can handle both Moore and Neumann neighborhood types and can also handle toroidal grids.
+#' @description This function retrieves the ID of the neighboring cells in a
+#' cellular automaton (CA) grid, or either just retrieve or calculate their attributes.
+#' It can handle both Moore and Neumann neighborhood types and
+#' can also handle toroidal grids.
 #'
-#' @param D A \code{netABM} class object. If \code{CA} is not provided,
-#' \code{D} is required to access the CA grid.
-#' @param ID The ID of the target agent. If \code{loc} is not provided, \code{ID} is required.
-#' @param loc The location of the target cell as a vector (row, column).
-#' If not provided, it will be inferred from the \code{ID}.
-#' @param which_ca The index or name of the CA grid to use within the \code{D} object. Defaults to \code{1}.
-#' @param CA A matrix representing the CA grid. If provided, this overrides the \code{D} parameter.
-#' @param neib_type The type of neighborhood to use, either \code{"Moore"} or \code{"Neumann"}. Defaults to \code{"Moore"}.
-#' @param torus Logical, indicating whether the grid should be treated as a torus. Defaults to \code{FALSE}.
-#' @param attr A character vector specifying the attributes of the neighboring agents to retrieve. If `NULL`, only the IDs of neighboring cells are returned.
-#' @param FUN An optional function to apply to the attributes of neighboring agents to calculate the specified score.
+#' @param which_ca The index or name of the CA grid to use within the \code{D} object.
+#' Defaults is \code{NULL}, resulting in selecting the first "ca" object found by
+#' \code{D$.field_type()} method.
+#' @param neib_type The type of neighborhood to use,
+#' either \code{"Moore"} or \code{"Neumann"}. Defaults to \code{"Moore"}.
+#' @param which_attr A character vector specifying the attributes of the
+#' neighboring agents to retrieve. If \code{NULL}, only the IDs of neighboring
+#' cells are returned.
+#' @param neib_size A numeric vector specifying the distance of neighbors considered
+#' from the agent. If a single vector is provided, it will copied to each dimension.
+#' Default is \code{1}.
+#' @param torus Logical, indicating whether the grid should be treated as a torus.
+#' Defaults to \code{FALSE}.
+#' @param D A \code{ABM_D} class object. The default \code{NULL} results in retrieving
+#' D from the parent.frame, which will be usual usage.
+#' @param ID The ID of the target agent. The default \code{NULL} results in retrieving
+#' the ID from the parent.frame, which will be usual usage.
+#' @param loc The location of the target cell as a 1*CA's dimension matrix format
+#'  (e.g., matrix(c(row_ID, column_ID)), 1, 2))
+#' If not provided, it will be retrieved from the \code{ID}'s location.
+#' @param FUN An optional function to apply to the attributes of neighboring
+#' agents to calculate the specified score.
 #' If \code{NULL}, the attributes are returned as-is.
-#' @param ... Additional arguments passed to `FUN`.
+#' @param ... Additional arguments passed to \code{FUN}.
 #' @return Depending on the input parameters:
-#' - If \code{attr} is `NULL`, a vector of neighboring cell IDs is returned.
-#' - If \code{attr} is provided, a data frame of the specified attributes of neighboring agents is returned.
-#' - If \code{FUN} is provided, the result of applying \code{FUN} to the attributes is returned.
+#' - If \code{which_attr} is \code{NULL}, a vector of neighboring cell IDs is returned.
+#' - If \code{which_attr} is provided, a data frame of the specified
+#' attributes of neighboring agents is returned.
+#' - If both \code{which_attr} and \code{FUN} are provided,
+#' the result of applying \code{FUN} to the attributes is returned.
 #' @importFrom rlang is_empty
 #' @examples
 #' # creating a CA
@@ -30,118 +44,142 @@
 #' # Apply a function to the attributes of neighboring agents
 #' ca_neib(ID = 1, CA = CA, attr = attr, FUN = mean)
 #' @export
+#' @examples
+#' D <- setABM(agent_n = 5, agent_attr = data.frame(age = 1:5), ca = 1)
+#' ca_neib(D = D, ID = 1)
+#' ca_neib(D = D, ID = 1, which_attr = "age")
+#' ca_neib(D = D, ID = 1, which_attr = "age", FUN = mean)
+
 ca_neib <- function(
+    which_ca = NULL,
+    neib_type = "Moore",
+    torus = FALSE,
+    which_attr = NULL,
+    neib_size = 1,
     D = NULL,
     ID = NULL,
     loc = NULL,
-    which_ca = 1,
-    which_attr = 1,
-    CA = NULL,
-    neib_type = "Moore",
-    torus = FALSE,
-    attr = NULL,
     FUN = NULL,
-    ...
-){
-  ## CAがそのまま定義されていればそちらを取得
-  ## そうでない場合にはDの指定から取得
-  if(is.null(CA)){
-    ## CAの名前を取得し、対象とするCAを特定する
-    if(is.numeric(which_ca)){
-      ca_namelist <- names(D$ca)[!names(D$ca) %in% c(".__enclos_env__","clone","print")]
-      which_ca <- ca_namelist[which_ca]
-    }
-    CA <- D$ca[[which_ca]]
+    ...){
+  ## DとIDが入っていない場合にはparent.frameから取得する
+  if(is.null(D)){D <- parent.frame()$D}
+  if(is.null(ID)){ID <- parent.frame()$self$ID}
+  ## which_caが直接指定されている場合にはそちらを取る。
+  ## そうでない場合にはDの中の1つめのcaを取得
+  if(is.null(which_ca)){
+    field_type <- D$.field_type()
+    which_ca <- names(field_type)[field_type=="ca"][1]
   }
-
-  # locが直接入力されていればそれを採用
-  # そうでなければIDのいるアドレスを特定
+  ## locが指定されていない場合には、自動取得
   if(is.null(loc)){
-    loc <- which(CA==ID, arr.ind = TRUE)
+    loc <- ca_loc(which_ca = which_ca, ID = ID, D = D, arr.ind = TRUE)
   }
-
+  ## CAを取得
+  CA <- D[[which_ca]]
   ## CAのdimを取得
   CA_dim <- dim(CA)
+  ## neib_sizeを確認(異なる場合にはneib_sizeの1番目の値をCA_dimの各次元に拡大)
+  if(length(neib_size) != length(CA_dim)){
+    neib_size <- rep(neib_size[1], length(CA_dim))
+  }
+  stopifnot("neib_size must be equal or greater than 0" = all(neib_size >= 0))
 
-  ## torusに対応させてCAをアップデートする
+  ## torusに対応させてCAを拡大する
   if(torus){
-    # 行に関して
-    if(loc[1]==1){
-      CA <- CA[c(CA_dim[1],(1:(CA_dim[1]-1))),]
-      loc[1] <- loc[1] + 1
-    }else if(loc[1]==CA_dim[1]){
-      CA <- CA[c((2:(CA_dim[1])),1),]
-      loc[1] <- loc[1] - 1
+    if(length(CA_dim)==2){
+      row_left <- ifelse(neib_size[1]==0, 0, seq(CA_dim[1], CA_dim[1] - neib_size[1] + 1, by = -1))
+      row_right <- ifelse(neib_size[1]==0, 0, seq(1, neib_size[1], by = 1))
+      col_upper <- ifelse(neib_size[2]==0, 0, seq(CA_dim[2], CA_dim[2] - neib_size[2] + 1, by = -1))
+      col_bottom <- ifelse(neib_size[2]==0, 0, seq(1, neib_size[2], by = 1))
+      new_row <- c(row_left, 1:CA_dim[1], row_right)
+      new_col <- c(col_upper, 1:CA_dim[2], col_bottom)
+      CA <- CA[new_row, new_col]
+      loc <- matrix(c(loc[1]+neib_size[1], loc[2]+neib_size[2]), 1, 2)
+      CA_dim <- dim(CA)
+    }else if(length(CA_dim)==3){
+      row_left <- ifelse(neib_size[1]==0, 0, seq(CA_dim[1], CA_dim[1] - neib_size[1] + 1, by = -1))
+      row_right <- ifelse(neib_size[1]==0, 0, seq(1, neib_size[1], by = 1))
+      col_upper <- ifelse(neib_size[2]==0, 0, seq(CA_dim[2], CA_dim[2] - neib_size[2] + 1, by = -1))
+      col_bottom <- ifelse(neib_size[2]==0, 0, seq(1, neib_size[2], by = 1))
+      depth_upper <- ifelse(neib_size[3]==0, 0, seq(CA_dim[3], CA_dim[3] - neib_size[3] + 1, by = -1))
+      depth_bottom <- ifelse(neib_size[3]==0, 0, seq(1, neib_size[3], by = 1))
+      new_row <- c(row_left, 1:CA_dim[1], row_right)
+      new_col <- c(col_upper, 1:CA_dim[2], col_bottom)
+      new_depth <- c(depth_upper, 1:CA_dim[3], depth_bottom)
+      CA <- CA[new_row, new_col, new_depth]
+      loc <- matrix(c(loc[1]+neib_size[1], loc[2]+neib_size[2], loc[3]+neib_size[3]), 1, 3)
+      CA_dim <- dim(CA)
+    }else{
+      warning("The CA with this size of dimension is currently not supported by this function.
+              NULL is returned.")
+      return(NULL)
     }
-    # 列に関して
-    if(loc[2]==1){
-      CA <- CA[ ,c(CA_dim[1],(1:(CA_dim[1]-1)))]
-      loc[2] <- loc[2] + 1
-    }else if(loc[2]==CA_dim[2]){
-      CA <- CA[ ,c((2:(CA_dim[1])),1)]
-      loc[2] <- loc[2] - 1
-    }
-    row_min <- loc[1] - 1
-    row_max <- loc[1] + 1
-    col_min <- loc[2] - 1
-    col_max <- loc[2] + 1
-  }else{
-    # 取得範囲を決定する
-    row_min <- ifelse(loc[1]==1, 1, loc[1]-1)
-    row_max <- ifelse(loc[1]==CA_dim[1], CA_dim[1], loc[1]+1)
-    col_min <- ifelse(loc[2]==1, 1, loc[2]-1)
-    col_max <- ifelse(loc[2]==CA_dim[2], CA_dim[2], loc[2]+1)
   }
 
   ## 回りのIDを取得する
-  neib_ID <- switch(neib_type,
-                    "Moore" = {
-                      neib_ID <- as.vector(CA[row_min:row_max, col_min:col_max])
-                      neib_ID <- setdiff(neib_ID, c(0, ID))
-                      neib_ID
-                    },
-                    "Neumann" = {
-                      neib_ID_col <- as.vector(CA[row_min:row_max, loc[2]])
-                      neib_ID_row <- as.vector(CA[loc[1]         , col_min:col_max])
-                      neib_ID <- setdiff(c(neib_ID_col,neib_ID_row), c(0, ID))
-                      neib_ID
-                    },
-                    stop("No neib_type option found.")
-  )
+    if(length(CA_dim)==2){
+      neib_row <- ifelse(loc[1]-neib_size[1] < 0, 1, loc[1]-neib_size[1]):
+        ifelse(loc[1]+neib_size[1] > CA_dim[1], CA_dim[1], loc[1]+neib_size[1])
+      neib_col <- ifelse(loc[2]-neib_size[2] < 0, 1, loc[2]-neib_size[2]):
+        ifelse(loc[2]+neib_size[2] > CA_dim[2], CA_dim[2], loc[2]+neib_size[2])
+      neib_ID <- switch(neib_type,
+                        "Moore" = as.vector(CA[neib_row, neib_col]),
+                        "Neumann" = {
+                          neib_ID_row <- as.vector(CA[neib_row, loc[2], loc[3]])
+                          neib_ID_colc <- as.vector(CA[loc[1], neib_col, loc[3]])},
+                        stop("No neib_type option found.")
+      )
+    }else if(length(CA_dim)==3){
+      neib_row <- ifelse(loc[1]-neib_size[1] < 0, 1, loc[1]-neib_size[1]):
+        ifelse(loc[1]+neib_size[1] > CA_dim[1], CA_dim[1], loc[1]+neib_size[1])
+      neib_col <- ifelse(loc[2]-neib_size[2] < 0, 1, loc[2]-neib_size[2]):
+        ifelse(loc[2]+neib_size[2] > CA_dim[2], CA_dim[2], loc[2]+neib_size[2])
+      neib_depth <- ifelse(loc[3]-neib_size[3] < 0, 1, loc[3]-neib_size[3]):
+        ifelse(loc[3]+neib_size[3] > CA_dim[3], CA_dim[3], loc[3]+neib_size[3])
+      neib_ID <- switch(neib_type,
+                        "Moore" = as.vector(CA[neib_row, neib_col, neib_depth]),
+                        "Neumann" = {
+                          neib_ID_row <- as.vector(CA[neib_row, loc[2], loc[3]])
+                          neib_ID_colc <- as.vector(CA[loc[1], neib_col, loc[3]])
+                          neib_ID_depth <- as.vector(CA[loc[1], loc[2], neib_depth])},
+                        stop("No neib_type option found.")
+      )
+    }else{
+      warning("The CA with this size of dimension is currently not supported by this function.
+              NULL is returned.")
+      return(NULL)
+    }
+    # neib_IDから0とself_IDをぬく
+    neib_ID <- setdiff(neib_ID, c(0, ID))
 
   # 何も周りにいない場合にはNULLを返す
-  if(rlang::is_empty(neib_ID)){
-    return(NULL)
-  }
+    if(rlang::is_empty(neib_ID)){
+      return(NULL)
+    }
 
   # attrがない場合にはneib_IDを返す
-  if(is.null(attr)){
+  if(is.null(which_attr)){
     return(neib_ID)
-  }else{
-    # attrが投入されていないばあい：
-    # neib_attrをDから取得する
-    if(is.null(attr)){
-      neib <- D$agent[neib_ID]
-      neib_attr <- data.frame(t(data.frame(lapply(1:length(neib), function(i){
-        unlist(neib[[i]]$a[which_attr])
-      }))))
-      rownames(neib_attr) <- neib_ID
-    }else{
-      neib_attr <- data.frame(attr[neib_ID])
-      rownames(neib_attr) <- neib_ID
-      colnames(neib_attr) <- NULL
-    }
-
-    if(is.null(FUN)){
-      # FUNがない場合にはneib_attrを返す
-      return(neib_attr)
-    }else{
-      ## 隣人のattributeからさらに計算を行う
-      calc_out <- apply(neib_attr, MARGIN = 2, FUN = FUN, ...)
-      ## calc_outを戻す
-      calc_out
-    }
   }
+
+  ## which_attrが投入されている場合
+  neib_attr <- do.call(data.frame,
+                       lapply(which_attr, function(X){
+                         unlist(lapply(neib_ID, function(i){D$agent[[i]][[X]]}))
+                       }))
+  colnames(neib_attr) <- which_attr
+
+  ## FUNがない場合にはneib_attrを返す
+  if(is.null(FUN)){
+      return(neib_attr)
+  }
+
+  ## FUNが投入されている場合にはさらに計算を行う
+  calc_out <- apply(neib_attr, MARGIN = 2, FUN = FUN, ...)
+  ## calc_outを戻す
+  calc_out
 }
+
+
 
 

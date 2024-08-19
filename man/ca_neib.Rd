@@ -5,39 +5,49 @@
 \title{Get Neighboring Cells in a Cellular Automaton}
 \usage{
 ca_neib(
+  which_ca = NULL,
+  neib_type = "Moore",
+  torus = FALSE,
+  which_attr = NULL,
+  neib_size = 1,
   D = NULL,
   ID = NULL,
   loc = NULL,
-  which_ca = 1,
-  which_attr = 1,
-  CA = NULL,
-  neib_type = "Moore",
-  torus = FALSE,
-  attr = NULL,
   FUN = NULL,
   ...
 )
 }
 \arguments{
-\item{D}{A \code{netABM} class object. If \code{CA} is not provided,
-\code{D} is required to access the CA grid.}
+\item{which_ca}{The index or name of the CA grid to use within the \code{D} object.
+Defaults is \code{NULL}, resulting in selecting the first "ca" object found by
+\code{D$.field_type()} method.}
 
-\item{ID}{The ID of the target agent. If \code{loc} is not provided, \code{ID} is required.}
+\item{neib_type}{The type of neighborhood to use,
+either \code{"Moore"} or \code{"Neumann"}. Defaults to \code{"Moore"}.}
 
-\item{loc}{The location of the target cell as a vector (row, column).
-If not provided, it will be inferred from the \code{ID}.}
+\item{torus}{Logical, indicating whether the grid should be treated as a torus.
+Defaults to \code{FALSE}.}
 
-\item{which_ca}{The index or name of the CA grid to use within the \code{D} object. Defaults to \code{1}.}
+\item{which_attr}{A character vector specifying the attributes of the
+neighboring agents to retrieve. If \code{NULL}, only the IDs of neighboring
+cells are returned.}
 
-\item{CA}{A matrix representing the CA grid. If provided, this overrides the \code{D} parameter.}
+\item{neib_size}{A numeric vector specifying the distance of neighbors considered
+from the agent. If a single vector is provided, it will copied to each dimension.
+Default is \code{1}.}
 
-\item{neib_type}{The type of neighborhood to use, either \code{"Moore"} or \code{"Neumann"}. Defaults to \code{"Moore"}.}
+\item{D}{A \code{ABM_D} class object. The default \code{NULL} results in retrieving
+D from the parent.frame, which will be usual usage.}
 
-\item{torus}{Logical, indicating whether the grid should be treated as a torus. Defaults to \code{FALSE}.}
+\item{ID}{The ID of the target agent. The default \code{NULL} results in retrieving
+the ID from the parent.frame, which will be usual usage.}
 
-\item{attr}{A character vector specifying the attributes of the neighboring agents to retrieve. If \code{NULL}, only the IDs of neighboring cells are returned.}
+\item{loc}{The location of the target cell as a 1*CA's dimension matrix format
+(e.g., matrix(c(row_ID, column_ID)), 1, 2))
+If not provided, it will be retrieved from the \code{ID}'s location.}
 
-\item{FUN}{An optional function to apply to the attributes of neighboring agents to calculate the specified score.
+\item{FUN}{An optional function to apply to the attributes of neighboring
+agents to calculate the specified score.
 If \code{NULL}, the attributes are returned as-is.}
 
 \item{...}{Additional arguments passed to \code{FUN}.}
@@ -45,15 +55,18 @@ If \code{NULL}, the attributes are returned as-is.}
 \value{
 Depending on the input parameters:
 \itemize{
-\item If \code{attr} is \code{NULL}, a vector of neighboring cell IDs is returned.
-\item If \code{attr} is provided, a data frame of the specified attributes of neighboring agents is returned.
-\item If \code{FUN} is provided, the result of applying \code{FUN} to the attributes is returned.
+\item If \code{which_attr} is \code{NULL}, a vector of neighboring cell IDs is returned.
+\item If \code{which_attr} is provided, a data frame of the specified
+attributes of neighboring agents is returned.
+\item If both \code{which_attr} and \code{FUN} are provided,
+the result of applying \code{FUN} to the attributes is returned.
 }
 }
 \description{
-This function retrieves neighboring cells in a cellular automaton (CA) grid,
-either defined by the \code{D} object or directly specified by the \code{CA} parameter.
-It can handle both Moore and Neumann neighborhood types and can also handle toroidal grids.
+This function retrieves the ID of the neighboring cells in a
+cellular automaton (CA) grid, or either just retrieve or calculate their attributes.
+It can handle both Moore and Neumann neighborhood types and
+can also handle toroidal grids.
 }
 \examples{
 # creating a CA
@@ -63,4 +76,8 @@ attr <- 1:16
 ca_neib(ID = 1, CA = CA, attr = attr)
 # Apply a function to the attributes of neighboring agents
 ca_neib(ID = 1, CA = CA, attr = attr, FUN = mean)
+D <- setABM(agent_n = 5, agent_attr = data.frame(age = 1:5), ca = 1)
+ca_neib(D = D, ID = 1)
+ca_neib(D = D, ID = 1, which_attr = "age")
+ca_neib(D = D, ID = 1, which_attr = "age", FUN = mean)
 }

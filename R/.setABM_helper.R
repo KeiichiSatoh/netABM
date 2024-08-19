@@ -554,7 +554,7 @@
 # .insert_line_to_function
 #-------------------------------------------------------------------------------
 
-.insert_line_to_function <- function(FUN, expr = expression(self_ID <- self$ID), after=1) {
+.insert_line_to_function <- function(FUN, expr = expression(self <- self), after=1) {
   body(FUN)<-as.call(append(as.list(body(FUN)), expr, after=after))
   FUN
 }

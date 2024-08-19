@@ -59,13 +59,15 @@ calc_softmax(~ X1 * X2, data = dat, standardize = FALSE)
 
 # Choose based on softmax probabilities
 choose_softmax(Y ~ X1 * X2, data = dat, standardize = FALSE, n = 2)
-
 }
 \seealso{
 Other f_tools: 
 \code{\link{ca_2d_to_3d}()},
+\code{\link{ca_loc}()},
 \code{\link{ca_move}()},
-\code{\link{get_ca_loc}()}
+\code{\link{calc_logistic}()},
+\code{\link{f_nothing}()},
+\code{\link{get_ca}()}
 }
 \author{
 Keiichi Satoh

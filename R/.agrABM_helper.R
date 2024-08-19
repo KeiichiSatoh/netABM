@@ -176,9 +176,6 @@
       names(out) <- names(D$log)
     }else{
     ## attr_long == TRUEの場合
-      out <- lapply(1:length(out), function(t){
-        data.frame(out[[t]], time = times[[t]])
-      })
       out <- do.call(dplyr::bind_rows, out)
     }
   }

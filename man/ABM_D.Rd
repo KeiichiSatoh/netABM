@@ -33,6 +33,8 @@ ABM_D$new()
 \itemize{
 \item \href{#method-ABM_D-.save}{\code{ABM_D$.save()}}
 \item \href{#method-ABM_D-print}{\code{ABM_D$print()}}
+\item \href{#method-ABM_D-.field_type}{\code{ABM_D$.field_type()}}
+\item \href{#method-ABM_D-.agent_attr}{\code{ABM_D$.agent_attr()}}
 \item \href{#method-ABM_D-clone}{\code{ABM_D$clone()}}
 }
 }
@@ -55,6 +57,35 @@ print method of the \code{ABM_D} class
 \if{html}{\out{<div class="r">}}\preformatted{ABM_D$print()}\if{html}{\out{</div>}}
 }
 
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-ABM_D-.field_type"></a>}}
+\if{latex}{\out{\hypertarget{method-ABM_D-.field_type}{}}}
+\subsection{Method \code{.field_type()}}{
+get the field type of the \code{ABM_D} class
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{ABM_D$.field_type()}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-ABM_D-.agent_attr"></a>}}
+\if{latex}{\out{\hypertarget{method-ABM_D-.agent_attr}{}}}
+\subsection{Method \code{.agent_attr()}}{
+get the attribute of the agents in \code{ABM_D} class
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{ABM_D$.agent_attr(from_log = FALSE, attr_long = FALSE)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{from_log}}{logical. If the attribute is retrieved from log.}
+
+\item{\code{attr_long}}{logical. If the attribute from the log is converted into the long format.}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-ABM_D-clone"></a>}}

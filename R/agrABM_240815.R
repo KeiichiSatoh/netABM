@@ -166,7 +166,7 @@ agrABM <- function(
         })
         names(agrD) <- names(D$log)
         # agentを付加する
-        agrD$agent <- agent
+        agrD$agent <- agent_attr
       }else{
       ### by_field = TRUEの場合
       ### attrはlong、その他の各要素はtimeごとに並べる
@@ -196,7 +196,7 @@ agrABM <- function(
           agrD$notes[[t]] <- D$log[[t]]$notes
         }
         # attributeを付加する
-        agrD$agent <- agent
+        agrD$agent <- agent_attr
       }
     }
   }#---logから取得ここまで
