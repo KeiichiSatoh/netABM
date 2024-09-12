@@ -22,6 +22,7 @@ Imports:
     rlang,
     sna,
     vctrs,
+    dplyr,
     dqrng
 Depends: 
     R (>= 2.10)
