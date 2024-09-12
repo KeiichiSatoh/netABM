@@ -143,8 +143,8 @@ memo_length <- memoise(length)
                    return(NULL)
                  })
     })
-    updateFUN_label <- "default"
     }
+    updateFUN_label <- "default"
   }else if(is.call(updateFUN_sbs)){
     # その他のユーザー指定の場合
     ## callの場合
