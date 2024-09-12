@@ -15,7 +15,6 @@ Imports:
     cachem,
     Matrix,
     memoise,
-    ndtv,
     network,
     networkDynamic,
     parallel,
