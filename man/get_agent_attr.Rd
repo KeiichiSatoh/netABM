@@ -4,10 +4,12 @@
 \alias{get_agent_attr}
 \title{Get A Agents' Attributes From A ABM_D Object.}
 \usage{
-get_agent_attr(D, from_log = FALSE, attr_long = FALSE)
+get_agent_attr(D, which_attr = NULL, from_log = FALSE, attr_long = FALSE)
 }
 \arguments{
 \item{D}{An object of class \code{ABM_D}.}
+
+\item{which_attr}{character. If \code{NULL}, retrieve all agent's attribute.}
 
 \item{from_log}{logical. Whether the agent attributes should be extracted from the log.}
 
@@ -23,8 +25,7 @@ agents' attributes.
 \examples{
 # Create the ABM_D object
 agent_attr <- data.frame(
-   age = 1:5,
-   sex = c("m","m","m","f","f"))
+    sex = c("m","m","m","f","f"))
 D <- setABM(agent_n = 5, agent_attr = agent_attr)
 
 # Extract the agent attributes

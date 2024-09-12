@@ -137,10 +137,14 @@ memo_length <- memoise(length)
   if(is.null(updateFUN_sbs)){
     updateFUN_shaped <- function(D = D, selected_agent = NULL){
       lapply(X = selected_agent, function(X){
-        D$agent[[X]]$.f(D = D)
-      })
-    }
+        tryCatch({D$agent[[X]]$.f(D = D)},
+                 error = function(e){
+                   message("ERROR occured in time ", D$time, " with agent ", X, ".", "\n")
+                   return(NULL)
+                 })
+    })
     updateFUN_label <- "default"
+    }
   }else if(is.call(updateFUN_sbs)){
     # その他のユーザー指定の場合
     ## callの場合

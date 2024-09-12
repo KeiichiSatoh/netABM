@@ -14,6 +14,7 @@
 #' @param incl_posit A logical value indicating whether to include the position information of the \code{ca}.
 #' @param from_log A logical value indicating whether to retrieve data from the log.
 #' @param attr_long A logical value indicating whether to output the attributes in long format.
+#' @param which_attr Charactor vector of attributes. The default \code{NULL} retrieves all agent's attributes.
 #' @description
 #' In some cases, the user firstly defines the attribute of the {ca} by using the \code{ca} type field
 #' and wants to extract this \code{ca} field attribute of the cell in which agents locates.
@@ -36,9 +37,11 @@
 #' # Extract the zone number where each agent locates
 #' get_attr_from_ca(D = D, ID_ca = "ca", attr_ca = "zone")
 
-get_attr_from_ca <- memoise(function(
+# ログあり版
+get_attr_from_ca <- function(
     D, ID_ca, attr_ca = NULL, with_agent_attr = FALSE, incl_posit = FALSE,
-    from_log = FALSE, attr_long = FALSE){
+    from_log = FALSE, attr_long = FALSE, which_attr = NULL){
+  # 前処理---------------------------------
   # attr_caがNULLの場合
   if(is.null(attr_ca)){
     field_name <- names(D)[!names(D) %in% c(".__enclos_env__",".f","notes","log","time","agent","clone",".save")]
@@ -51,78 +54,31 @@ get_attr_from_ca <- memoise(function(
       attr_ca <- field_name
     }
   }
-  # agent_nを取得する
-  agent_n <- length(D$agent)
-  # 現在のデータの場合
-  if(from_log == FALSE){
-    # データを取得する
-    ID_ca_retrievd <- D[[ID_ca]]
-    attr_ca_retrieved <- lapply(attr_ca, function(p){D[[p]]})
-    names(attr_ca_retrieved) <- attr_ca
-    # positを取得
-    posit <- unlist(lapply(1:agent_n, function(i){which(i==ID_ca_retrievd)}))
-    # attr_caから各agentのattrを取得
-    out <- data.frame(lapply(attr_ca_retrieved, function(X){X[posit]}))
-    # IDを含める
-    out <- data.frame(ID = 1:agent_n, out)
-    # positを含めるか
-    if(incl_posit==TRUE){
-      out <- data.frame(out, posit = posit)
-    }
-    # agent_attrを含めるか
-    if(with_agent_attr==TRUE){
-      out <- data.frame(get_agent_attr(D), out[ ,-1])
-    }
+
+  # 本処理
+  if(from_log==FALSE){
+    ## 現在のデータから
+    out <- .get_attr_from_ca(D = D, ID_ca = ID_ca,
+                             attr_ca = attr_ca,
+                             with_agent_attr = with_agent_attr,
+                             incl_posit = incl_posit,
+                             which_attr = which_attr)
   }else{
-  # logデータからの場合
-    ## timeを取得する
-    times <- unlist(lapply(D$log, function(X){X$time}))
-    n_times <- length(D$log)
-    ## データを取得する
-    ID_ca_retrieved <- lapply(1:n_times, function(t){D$log[[t]][[ID_ca]]})
-    ## positを取得
-    posit <- lapply(ID_ca_retrieved, function(ca){
-      unlist(lapply(1:n_times, function(i){which(i == ca)}))
+    ## from_logから
+    out <- lapply(D$log, function(D_t){
+      .get_attr_from_ca(D = D_t, ID_ca = ID_ca, attr_ca = attr_ca,
+                        with_agent_attr = with_agent_attr,
+                        incl_posit = incl_posit,
+                        which_attr = which_attr)
     })
-    ## それぞれの時点ごとに、各ca_attrを取得する
-    out <- lapply(1:n_times, function(t){
-      D_timewise <- D$log[[t]]
-      posit_timewise <- posit[[t]]
-      attr_timewise <- data.frame(lapply(attr_ca, function(p){
-        temp_attr_ca <- D_timewise[[p]]
-        unlist(lapply(1:agent_n, function(i){temp_attr_ca[i]}))}
-      ))
-      names(attr_timewise) <- attr_ca
-      data.frame(ID = 1:agent_n, attr_timewise)
-    })
-    names(out) <- names(times)
-    ## incl_posit = Tの場合
-    if(incl_posit==TRUE){
-      out <- lapply(1:n_times, function(t){
-        X_t <- out[[t]]
-        posit_t <- posit[[t]]
-        X_t <- data.frame(X_t, posit = posit_t)
-        X_t
-      })
-      names(out) <- names(times)
-    }
-    ## agent_attrを含める場合
-    if(with_agent_attr==TRUE){
-      attr <- get_agent_attr(D, from_log = TRUE)
-      out <- lapply(1:length(out), function(t){
-        data.frame(attr[[t]], out[[t]][ ,-1])
-      })
-      names(out) <- names(times)
-    }
     ## attr_long = Tの場合
     if(attr_long==TRUE){
-      out <- lapply(1:length(out), function(t){
-        X <- data.frame(out[[t]], time = times[[t]])
-        X
+      out2 <- lapply(1:length(out), function(t){
+        data.frame(out[[t]], time = t)
       })
-      out <- do.call(rbind, out)
+      out <- do.call(rbind, out2)
     }
-  } # log==TRUEここまで
-  # リターン
+  } ## from_log = TRUEここまで
+  # アウトプット
   out
-})
+}

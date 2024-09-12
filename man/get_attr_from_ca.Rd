@@ -11,7 +11,8 @@ get_attr_from_ca(
   with_agent_attr = FALSE,
   incl_posit = FALSE,
   from_log = FALSE,
-  attr_long = FALSE
+  attr_long = FALSE,
+  which_attr = NULL
 )
 }
 \arguments{
@@ -30,6 +31,8 @@ will be used.}
 \item{from_log}{A logical value indicating whether to retrieve data from the log.}
 
 \item{attr_long}{A logical value indicating whether to output the attributes in long format.}
+
+\item{which_attr}{Charactor vector of attributes. The default \code{NULL} retrieves all agent's attributes.}
 }
 \value{
 A data frame containing the retrieved CA attributes.
