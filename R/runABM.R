@@ -23,10 +23,9 @@
 #' simulation corresponds to time 2.
 #'
 #' The built-in \code{.selectFUN} are as follows:
-#' \list{
 #' - \code{"all"}: selecting all agents.
 #' - \code{"one"}: Randomly selecting one agent in each time.
-#' }
+#'
 #' If user supplies its own stop function, the function should return the
 #' integer of each agent ID.
 #'

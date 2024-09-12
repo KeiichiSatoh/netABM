@@ -40,14 +40,13 @@ the initial time starts from 1, which means that the one run of the
 simulation corresponds to time 2.
 
 The built-in \code{.selectFUN} are as follows:
-\list{
 \itemize{
 \item \code{"all"}: selecting all agents.
 \item \code{"one"}: Randomly selecting one agent in each time.
 }
+
 If user supplies its own stop function, the function should return the
 integer of each agent ID.
-}
 
 If user supplied an original function to \code{stopFUN}, it should return
 \code{TRUE} when the condition to stop is satisfied.
