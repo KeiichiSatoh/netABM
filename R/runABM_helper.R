@@ -129,7 +129,7 @@ memo_length <- memoise(length)
 
 
 #-------------------------------------------------------------------------------
-# .shape_updateFUN
+# .shape_updateFUN(revised)
 #--------------------------------------------------------------------------------
 
 .shape_updateFUN <- function(updateFUN_sbs = updateFUN_sbs){
