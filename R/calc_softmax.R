@@ -85,9 +85,8 @@ calc_softmax <- function(formula, data = NULL, standardize = FALSE){
 
 #' @rdname calc_softmax
 #' @export
-choose_softmax <- function(formula, data = NULL, standardize = FALSE, n = 1){
+choose_softmax <- function(formula, data = NULL, standardize = FALSE, n = 1, replace = TRUE){
   p <- calc_softmax(formula = formula, data = data, standardize = standardize)
-  decision <- sample(names(p), size = n, prob = p)
-  decision
+  decision <- sample.int(n = length(p), size = n, prob = p, replace = replace)
+  names(p[decision])
 }
-
