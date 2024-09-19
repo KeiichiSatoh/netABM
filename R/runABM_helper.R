@@ -113,12 +113,21 @@ memo_length <- memoise(length)
   }else if(is.name(stopFUN_sbs)){
     ## nameの場合
     stopifnot("stopFUN does not exists in the environment" = exists(as.character(stopFUN_sbs)))
-    stopifnot("stopFUN is not function" = is.function(get(as.character(stopFUN_sbs))))
-    stopFUN_shaped <- get(stopFUN_sbs)
-    current_args <- formals(stopFUN_shaped)
-    current_args[which(names(current_args)=="D")] <- NULL
-    formals(stopFUN_shaped) <- c(alist(D = D), current_args)
-    stopFUN_label <- as.character(stopFUN_sbs)
+    if(is.numeric(get(as.character(stopFUN_sbs)))){
+      # numericの場合：
+      times <- get(as.character(stopFUN_sbs))
+      names(times) <- "times"
+      stopifnot("If being numeric, stopFUN must be greater than 0" = times > 0)
+      stopFUN_shaped <- function(){(D$time - init_time) >= times}
+      formals(stopFUN_shaped) <- c(alist(D = D), init_time = init_time, times)
+      stopFUN_label <- paste0("run_", times, "times")
+    }else if(is.function(get(as.character(stopFUN_sbs)))){
+      stopFUN_shaped <- get(stopFUN_sbs)
+      current_args <- formals(stopFUN_shaped)
+      current_args[which(names(current_args)=="D")] <- NULL
+      formals(stopFUN_shaped) <- c(alist(D = D), current_args)
+      stopFUN_label <- as.character(stopFUN_sbs)
+    }
   }else{
     stop("Incorrect input to stopFUN")
   }
