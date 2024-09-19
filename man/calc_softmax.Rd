@@ -7,7 +7,13 @@
 \usage{
 calc_softmax(formula, data = NULL, standardize = FALSE)
 
-choose_softmax(formula, data = NULL, standardize = FALSE, n = 1)
+choose_softmax(
+  formula,
+  data = NULL,
+  standardize = FALSE,
+  n = 1,
+  replace = TRUE
+)
 }
 \arguments{
 \item{formula}{A formula specifying the model.
