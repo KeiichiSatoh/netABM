@@ -48,8 +48,11 @@ pararun <- function(X, expr, ncores = NULL, LB = FALSE,
   parallel::clusterExport(cl, varlist = export_var)
 
   # evalQが指定されている場合にはexport
+  evalQ_expr <- substitute(evalQ_expr)
+
   if(!is.null(evalQ_expr)) {
-    parallel::clusterEvalQ(cl, expr = evalQ_expr)
+    # clusterCallで各クラスターにeval()を使って式を評価させる
+    parallel::clusterCall(cl, function(){eval(evalQ_expr, envir = .GlobalEnv)})
   }
 
   # lapply
