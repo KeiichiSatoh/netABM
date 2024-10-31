@@ -94,102 +94,162 @@
 #' D2 <- setABM(agent_n = 3, net = 1, agent_f = add_an_edge)
 
 setABM <- function(
-    agent_n,
-    agent_attr = NULL,
-    agent_f = list(NULL),
+    agents = NULL,
     net = NULL,
-    ca = NULL,
+    mat = NULL,
     euc = NULL,
+    df = NULL,
     other_field = NULL,
+    active_binding_field = NULL,
+    global_FUN = NULL,
+    select_FUN = NULL,
+    stop_FUN = NULL,
+    update_FUN = NULL,
+    partial_update_FUN_body = NULL,
     log = NULL,
     time = NULL,
     notes = NULL,
-    init = list(agent_n = NULL, agent_attr = NULL, agent_f = NULL,
-                net = NULL, ca =NULL, euc = NULL,
-                other_field = NULL, log = NULL,
-                time = NULL, notes = NULL)){
-  # インプットの形態を確認する------------
-  ## agent_n
-  if(!is.null(init$agent_n)){agent_n <- init$agent_n}
-  ## 数値データであることを確認
-  stopifnot("agent_n must be numeric." = is.numeric(agent_n))
-
-  ## agent_attr
-  if(!is.null(init$agent_attr)){
-    agent_attr <- init$agent_attr
-    agent_attr_sbs <- substitute(agent_attr)
+    init = list(agents = NULL,
+                net = NULL, mat = NULL, euc = NULL, df = NULL, other_field = NULL,
+                active_binding_field = NULL,
+                global_FUN = NULL, select_FUN = NULL, stop_FUN = NULL, update_FUN = NULL,
+                partial_update_FUN_body = NULL,
+                log = NULL, time = NULL, notes = NULL)){
+  # agent----------
+  if(!is.null(init$agents)){
+    agents <- init$agents
+    agents_sbs <- substitute(agents)
   }else{
-    agent_attr_sbs <- substitute(agent_attr)
+    agents_sbs <- substitute(agents)
   }
-  agent_attr <- .shape_agent_attr(agent_attr_sbs = agent_attr_sbs, agent_n = agent_n)
-  if(any(colnames(agent_attr)=="ID")){
-    colnames(agent_attr)[which(colnames(agent_attr)=="ID")] <- "user_ID"
-  }
+  agents_formatted <- .shape_agent(agents_sbs = agents_sbs)
 
-  ## agent_f
-  if(!is.null(init$agent_f)){
-    agent_f <- init$agent_f
-    agent_f_sbs <- substitute(agent_f)
-  }else{
-    agent_f_sbs <- substitute(agent_f)
-  }
-  agent_f_list <- .shape_agent_f(agent_f_sbs = agent_f_sbs, agent_n = agent_n)
-  ## agent_f_listの冒頭にself <- selfを挿入する
-  agent_f_list <- lapply(agent_f_list, .insert_line_to_function)
-
-  ## net
+  # net------------
   if(!is.null(init$net)){
     net <- init$net
     net_sbs <- substitute(net)
   }else{
     net_sbs <- substitute(net)
   }
-  net <- .shape_net(net_sbs = net_sbs, agent_n = agent_n)
+  net_formatted <- .shape_net(net_sbs = net_sbs)
 
-  ## ca
-  if(!is.null(init$ca)){
-    ca <- init$ca
-    ca_sbs <- substitute(ca)
+  # mat-----------
+  if(!is.null(init$mat)){
+    mat <- init$mat
+    mat_sbs <- substitute(mat)
   }else{
-    ca_sbs <- substitute(ca)
+    mat_sbs <- substitute(mat)
   }
-  ca <- .shape_ca(ca_sbs = ca_sbs, agent_n = agent_n)
+  mat_formatted <- .shape_mat(mat_sbs = mat_sbs)
 
-  ## euc
+  # euc-----------
   if(!is.null(init$euc)){
     euc <- init$euc
     euc_sbs <- substitute(euc)
   }else{
     euc_sbs <- substitute(euc)
   }
-  euc <- .shape_euc(euc_sbs = euc_sbs, agent_n = agent_n)
+  euc_formatted <- .shape_euc(euc_sbs = euc_sbs)
 
-  ## other_field
-  if(!is.null(init$other_field)){
-    other_field <- init$other_field
-    other_field_sbs <- substitute(other_field)
+  # df-----------
+  if(!is.null(init$df)){
+    df <- init$df
+    df_sbs <- substitute(df)
   }else{
-    other_field_sbs <- substitute(other_field)
+    df_sbs <- substitute(df)
   }
-  other_field <- .shape_other_field(other_field_sbs = other_field_sbs)
+  df_formatted <- .shape_df(df_sbs = df_sbs)
 
-  ## log
+  # other_field----
+  if(!is.null(init$other_field)){
+    other_field <- init$df
+    other_sbs <- substitute(other_field)
+  }else{
+    other_sbs <- substitute(other_field)
+  }
+  other_formatted <- .shape_other(other_sbs = other_sbs)
+
+  # active_binding_field---
+  if(!is.null(init$active_binding_field)){
+    active_binding_field <- init$active_binding_field
+    active_binding_field_sbs <- substitute(active_binding_field)
+  }else{
+    active_binding_field_sbs <- substitute(active_binding_field)
+  }
+  active_binding_field_formatted <- .shape_active_binding_field(active_binding_field_sbs = active_binding_field_sbs)
+
+  # global_FUN----
+  if(!is.null(init$global_FUN)){
+    global_FUN <- init$global_FUN
+    global_FUN_sbs <- substitute(global_FUN)
+  }else{
+    global_FUN_sbs <- substitute(global_FUN)
+  }
+  global_FUN_formatted <- .shape_global_FUN(global_FUN = global_FUN,
+                                            global_FUN_sbs = global_FUN_sbs)
+
+  # select_FUN----
+  if(!is.null(init$select_FUN)){
+    select_FUN <- init$select_FUN
+    select_FUN_sbs <- substitute(select_FUN)
+  }else{
+    select_FUN_sbs <- substitute(select_FUN)
+  }
+  select_FUN_formatted <- .shape_select_FUN(select_FUN = select_FUN,
+                                            select_FUN_sbs = select_FUN_sbs)
+
+  # stop_FUN----
+  if(!is.null(init$stop_FUN)){
+    stop_FUN <- init$stop_FUN
+    stop_FUN_sbs <- substitute(stop_FUN)
+  }else{
+    stop_FUN_sbs <- substitute(stop_FUN)
+  }
+  stop_FUN_formatted <- .shape_stop_FUN(stop_FUN = stop_FUN,
+                                        stop_FUN_sbs = stop_FUN_sbs)
+
+  # update_FUN----
+  if(!is.null(init$update_FUN)){
+    update_FUN <- init$update_FUN
+    update_FUN_sbs <- substitute(update_FUN)
+  }else{
+    update_FUN_sbs <- substitute(update_FUN)
+  }
+  update_FUN_formatted <- .shape_update_FUN(update_FUN = update_FUN,
+                                            update_FUN_sbs = update_FUN_sbs)
+
+  # partial_FUN_expr---
+  if(!is.null(init$partial_update_FUN_body)){
+    partial_update_FUN_body <- init$partial_update_FUN_body
+    partial_update_FUN_body_sbs <- substitute(partial_update_FUN_body)
+  }else{
+    partial_update_FUN_body_sbs <- substitute(partial_update_FUN_body)
+  }
+  partial_update_FUN_body_formatted <- .shape_partial_update_FUN_body(
+    partial_update_FUN_body = partial_update_FUN_body,
+    partial_update_FUN_body_sbs = partial_update_FUN_body_sbs)
+
+  ## log---------
   if(!is.null(init$log)){log <- init$log}
   if(is.null(log)){
-    log <- NA
-  }else{
+    log <- list(log = NULL)
+  }else if(is.list(log)){
     log <- log
+  }else{
+    stop("log must be NULL or list.")
   }
 
-  ## time
+  ## time--------
   if(!is.null(init$time)){time <- init$time}
   if(is.null(time)){
-    time <- 1
+    time <- list(time = 1)
+  }else if(rlang::is_scalar_atomic(time) && time >= 1){
+    time <- list(time = time)
   }else{
-    time <- time
+    stop("time must be integer greater than or equal to 1.")
   }
 
-  ## notes
+  ## notes------
   if(!is.null(init$notes)){notes <- init$notes}
   if(is.null(notes)){
     notes <- NULL
@@ -201,27 +261,35 @@ setABM <- function(
     }
   }
 
-  # Dのフィールドを作成する
-  D_field <- c(net, ca, euc, other_field)
-  # Dを生成
-  D <- .generator_D(field = D_field, time = time, log = log, notes = notes)
-  # agentを生成
-  agent <- .generator_Agent(agent_n = agent_n, agent_attr = agent_attr, agent_f = agent_f_list)
-  # Dにagentを貼り付ける
-  D$agent <- agent
-  # logがNAの場合には初期値を貼り付ける
-  if(is.na(D$log)){
-    agent <- lapply(X = 1:length(D$agent), function(X){D$agent[[X]]$.save()})
-    names(agent) <- names(D$agent)
-    D_field <- names(D)[!names(D) %in% c(".f", ".save", "clone",".__enclos_env__","agent","log")]
-    D_values <- lapply(X = D_field, get, envir = D$.__enclos_env__$self)
-    names(D_values) <- D_field
-    D_values$agent <- agent
-    new_log <- list(D_values)
-    names(new_log) <- paste0("t",D$time)
-    D$log <- new_log
+  ## Dを生成する
+  D <- ABM_D$new(fields = c(agents_formatted,
+                            net_formatted, mat_formatted, euc_formatted,
+                            df_formatted, other_formatted,
+                            partial_update_FUN_body_formatted,
+                            time, notes = notes),
+                 methods = c(global_FUN_formatted, select_FUN_formatted,
+                             stop_FUN_formatted, update_FUN_formatted),
+                 log = log)
+
+  # active_bindingを処理する(NULLではない場合)
+  if(!is.null(active_binding_field_formatted)){
+    active <- assign_func_envs(active_binding_field_formatted, D$.__enclos_env__)
+    for(name in names(active)){
+      makeActiveBinding(name, active[[name]], D$.__enclos_env__$self)
+    }
+    D$.__enclos_env__$.__active__ <- active
   }
+
+  # logがNULLの場合には初期値を貼り付ける
+  if(is.null(D$log)){
+    D$.save()}
+
+  # 同じ名前のfieldがないかを確認し、あればストップをかける
+  check_name_tb <- table(ls(D))>1
+  if(any(check_name_tb)){
+    stop(paste0("The following field has a duplicated name. Please give each field a unique name: ", names(check_name_tb[check_name_tb])))
+  }
+
   # Dを返却する
   D
 }
-

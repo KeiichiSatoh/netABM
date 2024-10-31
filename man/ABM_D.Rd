@@ -74,15 +74,17 @@ get the field type of the \code{ABM_D} class
 \subsection{Method \code{.agent_attr()}}{
 get the attribute of the agents in \code{ABM_D} class
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{ABM_D$.agent_attr(from_log = FALSE, attr_long = FALSE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{ABM_D$.agent_attr(which_attr = NULL, log = NULL, long_format = FALSE)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{from_log}}{logical. If the attribute is retrieved from log.}
+\item{\code{which_attr}}{A character vector of attribute names to retrieve. If \code{NULL}(default), all attributes are retrieved.}
 
-\item{\code{attr_long}}{logical. If the attribute from the log is converted into the long format.}
+\item{\code{log}}{A logical or a string. If \code{NULL}(default), the current data is retrieved. If "all", all log entries are retrieved. Otherwise, a specific log entry can be specified.}
+
+\item{\code{long_format}}{logical. If \code{TRUE}, the log data is converted into a long format with an additional time column.}
 }
 \if{html}{\out{</div>}}
 }
