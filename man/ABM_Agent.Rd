@@ -17,13 +17,76 @@ ABM_Agent$new()
 }
 \if{html}{\out{</div>}}
 }
+\section{Active bindings}{
+\if{html}{\out{<div class="r6-active-bindings">}}
+\describe{
+\item{\code{.f}}{A function that define the behavior of the agent. Default is \code{NULL}}
+}
+\if{html}{\out{</div>}}
+}
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
+\item \href{#method-ABM_Agent-new}{\code{ABM_Agent$new()}}
+\item \href{#method-ABM_Agent-.add_method}{\code{ABM_Agent$.add_method()}}
+\item \href{#method-ABM_Agent-.add_field}{\code{ABM_Agent$.add_field()}}
+\item \href{#method-ABM_Agent-.add_active_binding}{\code{ABM_Agent$.add_active_binding()}}
+\item \href{#method-ABM_Agent-.remove_field}{\code{ABM_Agent$.remove_field()}}
 \item \href{#method-ABM_Agent-.save}{\code{ABM_Agent$.save()}}
+\item \href{#method-ABM_Agent-.act_FUN_names}{\code{ABM_Agent$.act_FUN_names()}}
+\item \href{#method-ABM_Agent-.active_binding_names}{\code{ABM_Agent$.active_binding_names()}}
+\item \href{#method-ABM_Agent-.value_names}{\code{ABM_Agent$.value_names()}}
+\item \href{#method-ABM_Agent-.get_values}{\code{ABM_Agent$.get_values()}}
 \item \href{#method-ABM_Agent-print}{\code{ABM_Agent$print()}}
 \item \href{#method-ABM_Agent-clone}{\code{ABM_Agent$clone()}}
 }
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-ABM_Agent-new"></a>}}
+\if{latex}{\out{\hypertarget{method-ABM_Agent-new}{}}}
+\subsection{Method \code{new()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{ABM_Agent$new(fields = list(), methods = list())}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-ABM_Agent-.add_method"></a>}}
+\if{latex}{\out{\hypertarget{method-ABM_Agent-.add_method}{}}}
+\subsection{Method \code{.add_method()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{ABM_Agent$.add_method(name, method)}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-ABM_Agent-.add_field"></a>}}
+\if{latex}{\out{\hypertarget{method-ABM_Agent-.add_field}{}}}
+\subsection{Method \code{.add_field()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{ABM_Agent$.add_field(name, value)}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-ABM_Agent-.add_active_binding"></a>}}
+\if{latex}{\out{\hypertarget{method-ABM_Agent-.add_active_binding}{}}}
+\subsection{Method \code{.add_active_binding()}}{
+add an active binding
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{ABM_Agent$.add_active_binding(name, FUN)}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-ABM_Agent-.remove_field"></a>}}
+\if{latex}{\out{\hypertarget{method-ABM_Agent-.remove_field}{}}}
+\subsection{Method \code{.remove_field()}}{
+remove a field from the object
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{ABM_Agent$.remove_field(field_name)}\if{html}{\out{</div>}}
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-ABM_Agent-.save"></a>}}
@@ -36,10 +99,50 @@ Return the the current attributes of the agent
 
 }
 \if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-ABM_Agent-.act_FUN_names"></a>}}
+\if{latex}{\out{\hypertarget{method-ABM_Agent-.act_FUN_names}{}}}
+\subsection{Method \code{.act_FUN_names()}}{
+Return the name of the act_FUN fields.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{ABM_Agent$.act_FUN_names()}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-ABM_Agent-.active_binding_names"></a>}}
+\if{latex}{\out{\hypertarget{method-ABM_Agent-.active_binding_names}{}}}
+\subsection{Method \code{.active_binding_names()}}{
+Return the name of the act_FUN fields.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{ABM_Agent$.active_binding_names()}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-ABM_Agent-.value_names"></a>}}
+\if{latex}{\out{\hypertarget{method-ABM_Agent-.value_names}{}}}
+\subsection{Method \code{.value_names()}}{
+Return the name of value fields.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{ABM_Agent$.value_names()}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-ABM_Agent-.get_values"></a>}}
+\if{latex}{\out{\hypertarget{method-ABM_Agent-.get_values}{}}}
+\subsection{Method \code{.get_values()}}{
+get the value in value fields.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{ABM_Agent$.get_values(attr = NULL)}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-ABM_Agent-print"></a>}}
 \if{latex}{\out{\hypertarget{method-ABM_Agent-print}{}}}
 \subsection{Method \code{print()}}{
-print the list of field names and the status of the dataset
+Print the agent's values
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{ABM_Agent$print()}\if{html}{\out{</div>}}
 }

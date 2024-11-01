@@ -28,33 +28,59 @@ ABM_D$new()
 }
 \if{html}{\out{</div>}}
 }
+\section{Active bindings}{
+\if{html}{\out{<div class="r6-active-bindings">}}
+\describe{
+\item{\code{agent}}{list of the agents}
+
+\item{\code{time}}{current time of the dataset}
+
+\item{\code{notes}}{list of the notes. Default is \code{NULL}}
+
+\item{\code{.f}}{A function that control the fields of ABM_D. Default is \code{NULL}}
+}
+\if{html}{\out{</div>}}
+}
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-ABM_D-.save}{\code{ABM_D$.save()}}
-\item \href{#method-ABM_D-print}{\code{ABM_D$print()}}
+\item \href{#method-ABM_D-new}{\code{ABM_D$new()}}
+\item \href{#method-ABM_D-.active_binding_names}{\code{ABM_D$.active_binding_names()}}
 \item \href{#method-ABM_D-.field_type}{\code{ABM_D$.field_type()}}
+\item \href{#method-ABM_D-.remove_field}{\code{ABM_D$.remove_field()}}
+\item \href{#method-ABM_D-.add_agent}{\code{ABM_D$.add_agent()}}
+\item \href{#method-ABM_D-.add_stage}{\code{ABM_D$.add_stage()}}
+\item \href{#method-ABM_D-.add_FUN}{\code{ABM_D$.add_FUN()}}
+\item \href{#method-ABM_D-.add_active_binding}{\code{ABM_D$.add_active_binding()}}
+\item \href{#method-ABM_D-.add_partial_update_FUN_body}{\code{ABM_D$.add_partial_update_FUN_body()}}
+\item \href{#method-ABM_D-.save}{\code{ABM_D$.save()}}
+\item \href{#method-ABM_D-.FUN_list}{\code{ABM_D$.FUN_list()}}
+\item \href{#method-ABM_D-.field_list}{\code{ABM_D$.field_list()}}
+\item \href{#method-ABM_D-.value_list}{\code{ABM_D$.value_list()}}
+\item \href{#method-ABM_D-.get_value}{\code{ABM_D$.get_value()}}
+\item \href{#method-ABM_D-print}{\code{ABM_D$print()}}
 \item \href{#method-ABM_D-.agent_attr}{\code{ABM_D$.agent_attr()}}
+\item \href{#method-ABM_D-.summary}{\code{ABM_D$.summary()}}
+\item \href{#method-ABM_D-.plot}{\code{ABM_D$.plot()}}
 \item \href{#method-ABM_D-clone}{\code{ABM_D$clone()}}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-ABM_D-.save"></a>}}
-\if{latex}{\out{\hypertarget{method-ABM_D-.save}{}}}
-\subsection{Method \code{.save()}}{
-Save the current status of the fields into log
+\if{html}{\out{<a id="method-ABM_D-new"></a>}}
+\if{latex}{\out{\hypertarget{method-ABM_D-new}{}}}
+\subsection{Method \code{new()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{ABM_D$.save()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{ABM_D$new(fields = list(), methods = list(), log = NULL)}\if{html}{\out{</div>}}
 }
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-ABM_D-print"></a>}}
-\if{latex}{\out{\hypertarget{method-ABM_D-print}{}}}
-\subsection{Method \code{print()}}{
-print method of the \code{ABM_D} class
+\if{html}{\out{<a id="method-ABM_D-.active_binding_names"></a>}}
+\if{latex}{\out{\hypertarget{method-ABM_D-.active_binding_names}{}}}
+\subsection{Method \code{.active_binding_names()}}{
+show the name of the active binding field
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{ABM_D$print()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{ABM_D$.active_binding_names()}\if{html}{\out{</div>}}
 }
 
 }
@@ -62,9 +88,128 @@ print method of the \code{ABM_D} class
 \if{html}{\out{<a id="method-ABM_D-.field_type"></a>}}
 \if{latex}{\out{\hypertarget{method-ABM_D-.field_type}{}}}
 \subsection{Method \code{.field_type()}}{
-get the field type of the \code{ABM_D} class
+show the type of each field
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{ABM_D$.field_type()}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-ABM_D-.remove_field"></a>}}
+\if{latex}{\out{\hypertarget{method-ABM_D-.remove_field}{}}}
+\subsection{Method \code{.remove_field()}}{
+remove field
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{ABM_D$.remove_field(field_name)}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-ABM_D-.add_agent"></a>}}
+\if{latex}{\out{\hypertarget{method-ABM_D-.add_agent}{}}}
+\subsection{Method \code{.add_agent()}}{
+add a set of agents
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{ABM_D$.add_agent(name, agent)}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-ABM_D-.add_stage"></a>}}
+\if{latex}{\out{\hypertarget{method-ABM_D-.add_stage}{}}}
+\subsection{Method \code{.add_stage()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{ABM_D$.add_stage(name, stage, field_type)}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-ABM_D-.add_FUN"></a>}}
+\if{latex}{\out{\hypertarget{method-ABM_D-.add_FUN}{}}}
+\subsection{Method \code{.add_FUN()}}{
+add FUN
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{ABM_D$.add_FUN(name, FUN, FUN_type)}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-ABM_D-.add_active_binding"></a>}}
+\if{latex}{\out{\hypertarget{method-ABM_D-.add_active_binding}{}}}
+\subsection{Method \code{.add_active_binding()}}{
+add an active binding
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{ABM_D$.add_active_binding(name, FUN)}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-ABM_D-.add_partial_update_FUN_body"></a>}}
+\if{latex}{\out{\hypertarget{method-ABM_D-.add_partial_update_FUN_body}{}}}
+\subsection{Method \code{.add_partial_update_FUN_body()}}{
+add an partial_update_FUN_body
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{ABM_D$.add_partial_update_FUN_body(name, partial_body)}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-ABM_D-.save"></a>}}
+\if{latex}{\out{\hypertarget{method-ABM_D-.save}{}}}
+\subsection{Method \code{.save()}}{
+Save the current status of the D into log
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{ABM_D$.save()}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-ABM_D-.FUN_list"></a>}}
+\if{latex}{\out{\hypertarget{method-ABM_D-.FUN_list}{}}}
+\subsection{Method \code{.FUN_list()}}{
+get FUN list
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{ABM_D$.FUN_list()}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-ABM_D-.field_list"></a>}}
+\if{latex}{\out{\hypertarget{method-ABM_D-.field_list}{}}}
+\subsection{Method \code{.field_list()}}{
+field list
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{ABM_D$.field_list()}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-ABM_D-.value_list"></a>}}
+\if{latex}{\out{\hypertarget{method-ABM_D-.value_list}{}}}
+\subsection{Method \code{.value_list()}}{
+value list
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{ABM_D$.value_list()}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-ABM_D-.get_value"></a>}}
+\if{latex}{\out{\hypertarget{method-ABM_D-.get_value}{}}}
+\subsection{Method \code{.get_value()}}{
+get field value
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{ABM_D$.get_value(field_name, value_name = NULL, log = NULL)}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-ABM_D-print"></a>}}
+\if{latex}{\out{\hypertarget{method-ABM_D-print}{}}}
+\subsection{Method \code{print()}}{
+print method of ABM_D
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{ABM_D$print()}\if{html}{\out{</div>}}
 }
 
 }
@@ -72,22 +217,44 @@ get the field type of the \code{ABM_D} class
 \if{html}{\out{<a id="method-ABM_D-.agent_attr"></a>}}
 \if{latex}{\out{\hypertarget{method-ABM_D-.agent_attr}{}}}
 \subsection{Method \code{.agent_attr()}}{
-get the attribute of the agents in \code{ABM_D} class
+get agents' attributes as data.frame
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{ABM_D$.agent_attr(which_attr = NULL, log = NULL, long_format = FALSE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{ABM_D$.agent_attr(agents = NULL, attr = NULL, log = NULL, long_format = FALSE)}\if{html}{\out{</div>}}
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{which_attr}}{A character vector of attribute names to retrieve. If \code{NULL}(default), all attributes are retrieved.}
-
-\item{\code{log}}{A logical or a string. If \code{NULL}(default), the current data is retrieved. If "all", all log entries are retrieved. Otherwise, a specific log entry can be specified.}
-
-\item{\code{long_format}}{logical. If \code{TRUE}, the log data is converted into a long format with an additional time column.}
 }
-\if{html}{\out{</div>}}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-ABM_D-.summary"></a>}}
+\if{latex}{\out{\hypertarget{method-ABM_D-.summary}{}}}
+\subsection{Method \code{.summary()}}{
+get the summary statistics
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{ABM_D$.summary(return_value = FALSE, log = NULL)}\if{html}{\out{</div>}}
 }
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-ABM_D-.plot"></a>}}
+\if{latex}{\out{\hypertarget{method-ABM_D-.plot}{}}}
+\subsection{Method \code{.plot()}}{
+plot method of ABM_D
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{ABM_D$.plot(
+  x_field_name,
+  x_dim = NULL,
+  y_field_name = NULL,
+  y_dim = NULL,
+  x_value = NULL,
+  y_value = NULL,
+  x_FUN = NULL,
+  y_FUN = NULL,
+  log = NULL,
+  time_series = FALSE,
+  return_value = FALSE,
+  ...
+)}\if{html}{\out{</div>}}
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-ABM_D-clone"></a>}}

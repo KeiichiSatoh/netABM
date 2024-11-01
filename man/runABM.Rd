@@ -4,10 +4,28 @@
 \alias{runABM}
 \title{Run the simulation based on the ABM_D object}
 \usage{
-runABM(D, selectFUN = "all", stopFUN = 1, updateFUN = NULL, save_log = FALSE)
+runABM(
+  D,
+  schedule = NULL,
+  remove_field = NULL,
+  rename_field = NULL,
+  keep_field = NULL,
+  update_FUN_name = NULL,
+  stop_FUN_name = NULL,
+  times = 1,
+  save_log = FALSE,
+  add_tryCatch = TRUE,
+  return_update_FUN = FALSE,
+  saveRDS_inbetween = FALSE,
+  temp_E = NULL,
+  RDS_file_name = "D_temp.rds"
+)
 }
 \arguments{
 \item{D}{a \code{ABM_D} class object.}
+
+\item{save_log}{logical; if the log of each run should be saved.
+The default is \code{FALSE}.}
 
 \item{selectFUN}{either a character of \code{"all"} or \code{"one"} or
 a user-defined function object about which agents to select for each time.}
@@ -20,9 +38,6 @@ result in running one simulation.}
 determines how the update of the field will be done.
 The default value \code{NULL} will result in letting the selected agents
 defined in \code{selectFUN} act based on their \code{.f} of each agent.}
-
-\item{save_log}{logical; if the log of each run should be saved.
-The default is \code{FALSE}.}
 }
 \value{
 a \code{ABM_D} class object

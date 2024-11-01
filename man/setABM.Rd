@@ -5,33 +5,29 @@
 \title{Setting ABM_D Objects}
 \usage{
 setABM(
-  agent_n,
-  agent_attr = NULL,
-  agent_f = list(NULL),
+  agents = NULL,
   net = NULL,
-  ca = NULL,
+  mat = NULL,
   euc = NULL,
+  df = NULL,
   other_field = NULL,
+  active_binding_field = NULL,
+  global_FUN = NULL,
+  select_FUN = NULL,
+  stop_FUN = NULL,
+  update_FUN = NULL,
+  partial_update_FUN_body = NULL,
   log = NULL,
   time = NULL,
   notes = NULL,
-  init = list(agent_n = NULL, agent_attr = NULL, agent_f = NULL, net = NULL, ca = NULL,
-    euc = NULL, other_field = NULL, log = NULL, time = NULL, notes = NULL)
+  init = list(agents = NULL, net = NULL, mat = NULL, euc = NULL, df = NULL, other_field =
+    NULL, active_binding_field = NULL, global_FUN = NULL, select_FUN = NULL, stop_FUN =
+    NULL, update_FUN = NULL, partial_update_FUN_body = NULL, log = NULL, time = NULL,
+    notes = NULL)
 )
 }
 \arguments{
-\item{agent_n}{integer for setting the number of agents.}
-
-\item{agent_attr}{vector/data.frame/list of attributes of agents
-(default: \code{NULL}).}
-
-\item{agent_f}{a user-defined or built-in function object or
-list of them representing agent's actions.}
-
 \item{net}{an integer/matrix/array or list of them for constructing the network field.}
-
-\item{ca}{an integer/matrix/array or list of them for constructing
-ca (i.e., Cellular Automaton) field.}
 
 \item{euc}{an integer/matrix/data.frame or list of them for constructing
 objects that representing agents' position in a euclidean space.}
@@ -44,6 +40,17 @@ the fields other than \code{net}, \code{ca}, and \code{euc}.}
 \item{time}{an integer of the current time of the data. For the normal usage, leave this input \code{NULL}.}
 
 \item{notes}{a vector or list of them for storing the any meta data.}
+
+\item{agent_n}{integer for setting the number of agents.}
+
+\item{agent_attr}{vector/data.frame/list of attributes of agents
+(default: \code{NULL}).}
+
+\item{agent_f}{a user-defined or built-in function object or
+list of them representing agent's actions.}
+
+\item{ca}{an integer/matrix/array or list of them for constructing
+ca (i.e., Cellular Automaton) field.}
 }
 \value{
 an \code{ABM_D} class object

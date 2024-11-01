@@ -414,6 +414,26 @@
   }
   active_binding_field_formatted <- active_binding_field
 
+  ## すべての形をfunction型に揃える
+  for(i in 1:length(active_binding_field_formatted)){
+    if(is.character(active_binding_field_formatted[[i]])){
+      parsed_FUN <- parse(text = active_binding_field_formatted[[i]])[[1]]
+      if(is.name(parsed_FUN)){
+        retrieved_FUN <- get(parsed_FUN)
+        stopifnot("The 'active_binding' retrieved from the specified object must be a function." = is.function(retrieved_FUN))
+        active_binding_field_formatted[[i]] <- retrieved_FUN
+      }else if(is.call(parsed_FUN)){
+        retrieved_FUN <- get(call_name(parsed_FUN))
+        stopifnot("The 'active_binding' retrieved from the specified object must be a function." = is.function(retrieved_FUN))
+        formals(retrieved_FUN) <- call_args(parsed_FUN)
+        active_binding_field_formatted[[i]] <- retrieved_FUN
+      }
+    }
+  }
+
+  # すべて関数型になっているか確認
+  stopifnot("active_binding_field must be a function." = all(unlist(lapply(active_binding_field_formatted, is.function))))
+
   # 名前を処理する
   # listに名前がついていない場合
   if(is.null(names(active_binding_field_formatted))){
