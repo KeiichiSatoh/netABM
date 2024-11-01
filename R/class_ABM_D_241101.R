@@ -620,14 +620,14 @@ ABM_D <- R6::R6Class("ABM_D", lock_objects = FALSE, cloneable = TRUE,
                            #' @import sna
                            #' @import plot.matrix
                            .plot = function(
-                              x_field_name, x_dim = NULL,
-                              y_field_name = NULL, y_dim = NULL,
-                              x_value = NULL, y_value = NULL,
-                              x_FUN = NULL, y_FUN = NULL,
-                              log = NULL,
-                              time_series = FALSE,
-                              return_value = FALSE,
-                              ...){
+    x_field_name, x_dim = NULL,
+    y_field_name = NULL, y_dim = NULL,
+    x_value = NULL, y_value = NULL,
+    x_FUN = NULL, y_FUN = NULL,
+    log = NULL,
+    time_series = FALSE,
+    return_value = FALSE,
+    ...){
                              # valueの値をチェック
                              stopifnot("x_value must be vector." = !is.list(x_value))
                              stopifnot("y_value must be vector." = !is.list(y_value))
@@ -694,7 +694,7 @@ ABM_D <- R6::R6Class("ABM_D", lock_objects = FALSE, cloneable = TRUE,
                                  } ### 過去のデータから採る場合--#
 
                                  # x_label
-                                 if(is.null(x_dim)){
+                                 if(is.null(value_name)){
                                    x_label <- x_field_name
                                  }else{
                                    x_label <- paste0(x_field_name," : ", x_dim)
@@ -746,13 +746,12 @@ ABM_D <- R6::R6Class("ABM_D", lock_objects = FALSE, cloneable = TRUE,
                              } ## time_seriesではない場合----------------#
 
                              # field_typeがない場合には"NULL"を指定
-                             x_field_type <- private$.field_type[[x_field_name]]
-                             if(is.na(x_field_type)||is.null(x_field_type)){
-                               x_field_type <- "NULL"
+                             if(is.null(attr(x_value[[1]], "field_type"))){
+                               attr(x_value[[1]], "field_type") <- "NULL"
                              }
 
                              # field_typeごとにアクションを分ける
-                             out <- switch(x_field_type,
+                             out <- switch(attr(x_value[[1]], "field_type"),
                                            "net" = {
                                              if(is.null(log)){
                                                main <- x_field_name
