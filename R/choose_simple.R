@@ -22,12 +22,12 @@
 #' @param prob A vector of probability weights for selecting elements from the vector.
 #' If set to \code{NULL} (the default), all elements have an equal chance of selection.
 #' @export
-#' @example
+#' @examples
 #' x <- c("A", "B", "C")
 #' prob <- c(0.3, 0.6, 0.1)
-#' choose_one(x = x, prob = prob)
+#' choose_simple(x = x, prob = prob)
 
 choose_simple <- function(x, size = 1, prob = NULL){
-  x[.Internal(sample(length(x), size = 1, replace = FALSE, prob = prob))]
+  x[.Internal(sample(length(x), size = size, replace = FALSE, prob = prob))]
 }
 

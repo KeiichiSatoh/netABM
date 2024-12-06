@@ -2,15 +2,11 @@
 % Please edit documentation in R/setABM.R
 \name{setABM}
 \alias{setABM}
-\title{Setting ABM_D Objects}
+\title{Construct an \code{ABM_G} Class Object}
 \usage{
 setABM(
   agents = NULL,
-  net = NULL,
-  mat = NULL,
-  euc = NULL,
-  df = NULL,
-  other_field = NULL,
+  stage = NULL,
   active_binding_field = NULL,
   global_FUN = NULL,
   select_FUN = NULL,
@@ -20,113 +16,115 @@ setABM(
   log = NULL,
   time = NULL,
   notes = NULL,
-  init = list(agents = NULL, net = NULL, mat = NULL, euc = NULL, df = NULL, other_field =
-    NULL, active_binding_field = NULL, global_FUN = NULL, select_FUN = NULL, stop_FUN =
-    NULL, update_FUN = NULL, partial_update_FUN_body = NULL, log = NULL, time = NULL,
-    notes = NULL)
+  init = list(agents = NULL, stage = NULL, active_binding_field = NULL, global_FUN =
+    NULL, select_FUN = NULL, stop_FUN = NULL, update_FUN = NULL, partial_update_FUN_body
+    = NULL, log = NULL, time = NULL, notes = NULL)
 )
 }
 \arguments{
-\item{net}{an integer/matrix/array or list of them for constructing the network field.}
+\item{agents}{A list of \code{ABM_Agent} objects representing agents in the model,
+typically created using the \link{init_agent} function. Alternatively,
+a positive integer can be provided to create that number of agents.
+Default is \code{NULL}, meaning no agents will be created.}
 
-\item{euc}{an integer/matrix/data.frame or list of them for constructing
-objects that representing agents' position in a euclidean space.}
+\item{stage}{A data structure (e.g., matrix, list, or other formats)
+representing the 'stage' where agents act. Default is \code{NULL}.}
 
-\item{other_field}{A vector/matrix/array or list of them for constructing
-the fields other than \code{net}, \code{ca}, and \code{euc}.}
+\item{active_binding_field}{A named list specifying active binding fields
+that allow dynamic behavior for specific stages. Default is \code{NULL}.}
 
-\item{log}{a list that stores the log of the simulation. For the normal usage, leave this input \code{NULL}.}
+\item{global_FUN}{A function for global operations affecting the \code{G} object. Default is \code{NULL}.}
 
-\item{time}{an integer of the current time of the data. For the normal usage, leave this input \code{NULL}.}
+\item{select_FUN}{A function to select agents during simulation based on specific criteria. Default is \code{NULL}.}
 
-\item{notes}{a vector or list of them for storing the any meta data.}
+\item{stop_FUN}{A function defining the stopping conditions for the simulation. Default is \code{NULL}.}
 
-\item{agent_n}{integer for setting the number of agents.}
+\item{update_FUN}{A function that encapsulates one complete iteration of agent updates during the simulation. Default is \code{NULL}.}
 
-\item{agent_attr}{vector/data.frame/list of attributes of agents
-(default: \code{NULL}).}
+\item{partial_update_FUN_body}{A body of expressions to construct parts of \code{update_FUN}.
+Provide either character or \code{expression} objects. Default is \code{NULL}.}
 
-\item{agent_f}{a user-defined or built-in function object or
-list of them representing agent's actions.}
+\item{log}{A list containing snapshots of the \code{G} object at each simulation step. Default is \code{NULL}.}
 
-\item{ca}{an integer/matrix/array or list of them for constructing
-ca (i.e., Cellular Automaton) field.}
+\item{time}{An integer representing the current time step of the \code{G} object.
+The initial time is 1. Default is \code{NULL}, which sets \code{time = 1}.}
+
+\item{notes}{A list or data frame for user-defined notes or metadata related to the simulation. Default is \code{NULL}.}
+
+\item{init}{A named list of initial values for any of the arguments, including \code{agents}, \code{stage}, \code{active_binding_field},
+\code{global_FUN}, \code{select_FUN}, \code{stop_FUN}, \code{update_FUN}, \code{partial_update_FUN_body}, \code{log}, \code{time}, \code{notes}.
+If both \code{init} and individual arguments are specified, the values in \code{init} take precedence. Default is an empty list.}
 }
 \value{
-an \code{ABM_D} class object
+An object of class \code{ABM_G} representing the initialized ABM.
+This object contains fields and methods required to manage the simulation.
 }
 \description{
-\code{setABM} constructs a \code{ABM_D} object, which is the main data object of the /code{netABM} package.
+The \code{setABM} function constructs a \code{G} object (short for 'game') for
+agent-based model (ABM) simulations.
+The created \code{G} object serves as the foundation for running simulations
+using the \code{runABM} function.
 }
 \details{
-\code{setABM} is a constructor of \code{setABM_D} object,
-which has \code{agent}, \code{time}(set as 1), \code{log} (set as NULL),
-and \code{notes} as default.
-
-Each agent in the \code{agent} has their attribute set by \code{agent_attr}
-and the action as \code{.f} (i.e., "function").
-In addition to the user-defined \code{agent_attr}, each agent automatically get its \code{ID} and \code{f_label} and store them
-as their attributes. The latter \code{f_label} is taken from the object name of \code{agent_f}.
-
-There are two ways to set \code{agnet_f}.
-The first way is to write the user's own function of agent's
-action and supply this object to \code{agent_f}.
-Do not write the function directly to \code{agent_f} because this will not be properly parsed.
-Upon writing an original function, be sure to aware the following two reserved name:
+The \code{setABM} function offers a flexible interface to define agents, stages,
+and functions for ABM simulations.
+Key rules for parameter configuration include:
 \itemize{
-\item \code{self} is a reserved for indicating the agent themselves.
-\item \code{D} is a reserved for indicating the {ABM_D} object.
+\item For a single object, pass it directly.
+\item For multiple objects, use a \code{list}.
+\item Named fields should use the format \code{list(field_name = x)}.
+If no name is provided (e.g., \code{list(x)}), the object name will be used as the field name.
+}
+\subsection{Parameter-Specific Notes}{
+\itemize{
+\item \strong{\code{agents}}:
+\itemize{
+\item Specify a number to create a corresponding number of agents.
+This approach is useful for initializing the skeleton of a \code{G} object,
+with further details to be added later using functions like \link{modify_agent}.
+\item Alternatively, provide a list of \code{ABM_Agent} objects created via \link{init_agent}.
+To include multiple agent groups, use a list, e.g., \code{agents = list(teacher = 2, student = 3)}.
+}
+\item \strong{\code{stage}}: Accepts various formats, including scalar, vector, matrix, array, data.frame, or list.
+Multiple stages can be specified as \code{stage = list(stage1 = mat1, stage2 = mat2)}.
+\item \strong{Functions (\code{active_binding_field}, \code{global_FUN}, \code{select_FUN}, \code{stop_FUN}, \code{update_FUN})}:
+Functions can be specified in one of four ways:
+\enumerate{
+\item Function object: e.g., \code{act_FUN = act_x1}.
+\item Anonymous function: e.g., \code{act_FUN = function() {...}}.
+\item Function name as a string: e.g., \code{act_FUN = "act_x1"}.
+\item Function name with arguments as a string: e.g., \code{act_FUN = "act_x1(a = 1)"}.
+}
+\item \strong{\code{active_binding_field}}: This parameter specifies dynamic fields
+that calculate their values based on other fields in the \code{G} object.
+\item \strong{\code{global_FUN}}: Operates on fields of the \code{G} object, similar to \code{act_FUN} at the agent level.
+\item \strong{\code{select_FUN}}: Returns agent's index in the list of agents (NOT: \code{IDs}) based on a selection condition.
+\item \strong{\code{stop_FUN}}: Ends the simulation if specific conditions are met (returns \code{TRUE}).
+\item \strong{\code{update_FUN}}: Encapsulates one complete iteration of updates.
+\item \strong{\code{partial_update_FUN_body}}: A modular way to predefine parts of \code{update_FUN}.
+}
 }
 
-The second way of setting \code{agent_f} is to use a built-in function of this package.
-This second way actually has further three variations. First, the easiest one,
-just supply the function object to \code{agent_f} (e.g., agent_f = function_name).
-Second, if user wants to modify some argument, supply it as a form: \code{function_name(x = a new value)}.
-Third, if user wants to put another name to this modified function object, assign it with substitute().
-Then supply this substituted object to \code{agnet_f}. The last method may be useful when the modification
-of the function is very long.
-For getting the ideas more concretely about how to supply a function to \code{agent_f},
-see the examples below.
+\subsection{Additional Notes}{
 
-If \code{net} is an integer, it creates the relevant number of \code{net} field
-in the resulted \code{ABM_D} object, wherein there are no ties among agents.
-Notably, if the integer is supplied as list, each value is used for filling each cell in each matrix.
+All functions (except \code{partial_update_FUN_body} and \code{active_binding_field})
+automatically receive two arguments internally: \code{G} (the \code{G} object) and \code{E}
+(a temporary environment for intermediate objects).
+}
 
-Likewise, if \code{ca} is an integer, it creates the relevant number of \code{ca} field,
-wherein the position of each agent is randomly assigned in a \code{sqrt(agent_n + 1)*sqrt(agent_n + 1)} matrix.
-Uf the integer is supplied as list, each value is used for determining the \code{nrow} and \code{ncol} of each matrix.
-
-Similarly, if \code{euc} is an integer, it creates the relevant number of \code{euc} field,
-wherein the position of each agent is randomly assigned in a two-dimensional space
-via normal distribution that has the mean value of 0 and the standard deviation of 1.
-
-\code{notes} can be used, for example, to store the parameter of constructing
-fields. The values in the notes can be later converted into a variable of agent * variable data.frame
-via the data-format transformer \code{agrABM}.
+\subsection{Logging and Metadata}{
+\itemize{
+\item \strong{\code{log}}: Stores snapshots of the \code{G} object after each simulation step.
+\item \strong{\code{time}}: Tracks the current simulation time step, starting at 1 by default.
+\item \strong{\code{notes}}: Allows users to store custom metadata or notes as a list.
+}
+}
 }
 \examples{
-Data for the agent attributes and agent behavior
-agent_attr <- data.frame(
-age = c(0, 1, 2, 3, 4),
-sex = c("m","m","m","f","f"))
-
-# Behavior 1: Agent gets older by beta in each time in a simulation.
-agent_get_older <- function(beta = 1){self$age <- self$age + beta}
-
-# Example 1-1: Set the default behavior
-D1_1 <- setABM(agent_n = 3, agent_f = agent_get_older)
-
-# Example 1-2: Modifying the behavior parameter beta to 2
-D1_2 <- setABM(agent_n = 3, agent_f = agent_get_older(b = 2))
-
-# Example 2: Set a net field and set a agent behavior on this field
-# Behavior 2: Agent add an edge randomly
-add_an_edge <- function(){
-  alters_candid <- as.character(setdiff(1:length(D$agent), self$ID))
-  alter_decided <- sample(alters_candid, size = 1)
-  D$net[self$ID, alter_decided] <- 1}
-
-D2 <- setABM(agent_n = 3, net = 1, agent_f = add_an_edge)
+G <- setABM(agents = 3, stage = matrix(0, 3, 3))
+}
+\seealso{
+\link{runABM}, \link{init_agent}, \link{ABM_G}
 }
 \author{
 Keiichi Satoh

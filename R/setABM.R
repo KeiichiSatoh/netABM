@@ -1,105 +1,86 @@
-#' @title Setting ABM_D Objects
+#' @title Construct an `ABM_G` Class Object
 #' @description
-#' \code{setABM} constructs a \code{ABM_D} object, which is the main data object of the /code{netABM} package.
-#' @param agent_n integer for setting the number of agents.
-#' @param agent_attr vector/data.frame/list of attributes of agents
-#'  (default: \code{NULL}).
-#' @param agent_f a user-defined or built-in function object or
-#' list of them representing agent's actions.
-#' @param net an integer/matrix/array or list of them for constructing the network field.
-#' @param ca an integer/matrix/array or list of them for constructing
-#' ca (i.e., Cellular Automaton) field.
-#' @param euc an integer/matrix/data.frame or list of them for constructing
-#' objects that representing agents' position in a euclidean space.
-#' @param other_field A vector/matrix/array or list of them for constructing
-#' the fields other than \code{net}, \code{ca}, and \code{euc}.
-#' @param log a list that stores the log of the simulation. For the normal usage, leave this input \code{NULL}.
-#' @param time an integer of the current time of the data. For the normal usage, leave this input \code{NULL}.
-#' @param notes a vector or list of them for storing the any meta data.
+#' The `setABM` function constructs a `G` object (short for 'game') for
+#' agent-based model (ABM) simulations.
+#' The created `G` object serves as the foundation for running simulations
+#' using the `runABM` function.
+#'
+#' @param agents A list of `ABM_Agent` objects representing agents in the model,
+#' typically created using the \link{init_agent} function. Alternatively,
+#' a positive integer can be provided to create that number of agents.
+#' Default is `NULL`, meaning no agents will be created.
+#' @param stage A data structure (e.g., matrix, list, or other formats)
+#' representing the 'stage' where agents act. Default is `NULL`.
+#' @param active_binding_field A named list specifying active binding fields
+#' that allow dynamic behavior for specific stages. Default is `NULL`.
+#' @param global_FUN A function for global operations affecting the `G` object. Default is `NULL`.
+#' @param select_FUN A function to select agents during simulation based on specific criteria. Default is `NULL`.
+#' @param stop_FUN A function defining the stopping conditions for the simulation. Default is `NULL`.
+#' @param update_FUN A function that encapsulates one complete iteration of agent updates during the simulation. Default is `NULL`.
+#' @param partial_update_FUN_body A body of expressions to construct parts of `update_FUN`.
+#' Provide either character or `expression` objects. Default is `NULL`.
+#' @param log A list containing snapshots of the `G` object at each simulation step. Default is `NULL`.
+#' @param time An integer representing the current time step of the `G` object.
+#' The initial time is 1. Default is `NULL`, which sets `time = 1`.
+#' @param notes A list or data frame for user-defined notes or metadata related to the simulation. Default is `NULL`.
+#' @param init A named list of initial values for any of the arguments, including `agents`, `stage`, `active_binding_field`,
+#' `global_FUN`, `select_FUN`, `stop_FUN`, `update_FUN`, `partial_update_FUN_body`, `log`, `time`, `notes`.
+#' If both `init` and individual arguments are specified, the values in `init` take precedence. Default is an empty list.
+#' @return An object of class `ABM_G` representing the initialized ABM.
+#' This object contains fields and methods required to manage the simulation.
 #'
 #' @details
-#' \code{setABM} is a constructor of \code{setABM_D} object,
-#' which has \code{agent}, \code{time}(set as 1), \code{log} (set as NULL),
-#' and \code{notes} as default.
+#' The `setABM` function offers a flexible interface to define agents, stages,
+#' and functions for ABM simulations.
+#' Key rules for parameter configuration include:
+#' - For a single object, pass it directly.
+#' - For multiple objects, use a `list`.
+#' - Named fields should use the format `list(field_name = x)`.
+#' If no name is provided (e.g., `list(x)`), the object name will be used as the field name.
 #'
-#' Each agent in the \code{agent} has their attribute set by \code{agent_attr}
-#' and the action as \code{.f} (i.e., "function").
-#' In addition to the user-defined \code{agent_attr}, each agent automatically get its \code{ID} and \code{f_label} and store them
-#'  as their attributes. The latter \code{f_label} is taken from the object name of \code{agent_f}.
+#' ### Parameter-Specific Notes
+#' - **`agents`**:
+#'   - Specify a number to create a corresponding number of agents.
+#'   This approach is useful for initializing the skeleton of a `G` object,
+#'     with further details to be added later using functions like \link{modify_agent}.
+#'   - Alternatively, provide a list of `ABM_Agent` objects created via \link{init_agent}.
+#'     To include multiple agent groups, use a list, e.g., `agents = list(teacher = 2, student = 3)`.
+#' - **`stage`**: Accepts various formats, including scalar, vector, matrix, array, data.frame, or list.
+#'   Multiple stages can be specified as `stage = list(stage1 = mat1, stage2 = mat2)`.
+#' - **Functions (`active_binding_field`, `global_FUN`, `select_FUN`, `stop_FUN`, `update_FUN`)**:
+#'   Functions can be specified in one of four ways:
+#'   1. Function object: e.g., `act_FUN = act_x1`.
+#'   2. Anonymous function: e.g., `act_FUN = function() {...}`.
+#'   3. Function name as a string: e.g., `act_FUN = "act_x1"`.
+#'   4. Function name with arguments as a string: e.g., `act_FUN = "act_x1(a = 1)"`.
+#' - **`active_binding_field`**: This parameter specifies dynamic fields
+#' that calculate their values based on other fields in the `G` object.
+#' - **`global_FUN`**: Operates on fields of the `G` object, similar to `act_FUN` at the agent level.
+#' - **`select_FUN`**: Returns agent's index in the list of agents (NOT: `IDs`) based on a selection condition.
+#' - **`stop_FUN`**: Ends the simulation if specific conditions are met (returns `TRUE`).
+#' - **`update_FUN`**: Encapsulates one complete iteration of updates.
+#' - **`partial_update_FUN_body`**: A modular way to predefine parts of `update_FUN`.
 #'
-#' There are two ways to set \code{agnet_f}.
-#' The first way is to write the user's own function of agent's
-#' action and supply this object to \code{agent_f}.
-#' Do not write the function directly to \code{agent_f} because this will not be properly parsed.
-#' Upon writing an original function, be sure to aware the following two reserved name:
-#' - \code{self} is a reserved for indicating the agent themselves.
-#' - \code{D} is a reserved for indicating the {ABM_D} object.
+#' ### Additional Notes
+#' All functions (except `partial_update_FUN_body` and `active_binding_field`)
+#' automatically receive two arguments internally: `G` (the `G` object) and `E`
+#'  (a temporary environment for intermediate objects).
 #'
-#' The second way of setting \code{agent_f} is to use a built-in function of this package.
-#' This second way actually has further three variations. First, the easiest one,
-#' just supply the function object to \code{agent_f} (e.g., agent_f = function_name).
-#' Second, if user wants to modify some argument, supply it as a form: \code{function_name(x = a new value)}.
-#' Third, if user wants to put another name to this modified function object, assign it with substitute().
-#' Then supply this substituted object to \code{agnet_f}. The last method may be useful when the modification
-#' of the function is very long.
-#' For getting the ideas more concretely about how to supply a function to \code{agent_f},
-#' see the examples below.
+#' ### Logging and Metadata
+#' - **`log`**: Stores snapshots of the `G` object after each simulation step.
+#' - **`time`**: Tracks the current simulation time step, starting at 1 by default.
+#' - **`notes`**: Allows users to store custom metadata or notes as a list.
 #'
-#' If \code{net} is an integer, it creates the relevant number of \code{net} field
-#' in the resulted \code{ABM_D} object, wherein there are no ties among agents.
-#' Notably, if the integer is supplied as list, each value is used for filling each cell in each matrix.
-#'
-#' Likewise, if \code{ca} is an integer, it creates the relevant number of \code{ca} field,
-#'  wherein the position of each agent is randomly assigned in a \code{sqrt(agent_n + 1)*sqrt(agent_n + 1)} matrix.
-#'  Uf the integer is supplied as list, each value is used for determining the \code{nrow} and \code{ncol} of each matrix.
-#'
-#'  Similarly, if \code{euc} is an integer, it creates the relevant number of \code{euc} field,
-#'  wherein the position of each agent is randomly assigned in a two-dimensional space
-#'   via normal distribution that has the mean value of 0 and the standard deviation of 1.
-#'
-#' \code{notes} can be used, for example, to store the parameter of constructing
-#'  fields. The values in the notes can be later converted into a variable of agent * variable data.frame
-#'  via the data-format transformer \code{agrABM}.
-#'
-#' @returns  an \code{ABM_D} class object
+#' @seealso [runABM], [init_agent], [ABM_G]
 #' @author Keiichi Satoh
-#' @importFrom rlang parse_expr
-#' @importFrom rlang call_name
-#' @importFrom rlang call_args
 #' @import R6
-#' @import Matrix
 #' @export
 #' @examples
-#' Data for the agent attributes and agent behavior
-#' agent_attr <- data.frame(
-#' age = c(0, 1, 2, 3, 4),
-#' sex = c("m","m","m","f","f"))
-#'
-#' # Behavior 1: Agent gets older by beta in each time in a simulation.
-#' agent_get_older <- function(beta = 1){self$age <- self$age + beta}
-#'
-#' # Example 1-1: Set the default behavior
-#' D1_1 <- setABM(agent_n = 3, agent_f = agent_get_older)
-#'
-#' # Example 1-2: Modifying the behavior parameter beta to 2
-#' D1_2 <- setABM(agent_n = 3, agent_f = agent_get_older(b = 2))
-#'
-#' # Example 2: Set a net field and set a agent behavior on this field
-#' # Behavior 2: Agent add an edge randomly
-#' add_an_edge <- function(){
-#'   alters_candid <- as.character(setdiff(1:length(D$agent), self$ID))
-#'   alter_decided <- sample(alters_candid, size = 1)
-#'   D$net[self$ID, alter_decided] <- 1}
-#'
-#' D2 <- setABM(agent_n = 3, net = 1, agent_f = add_an_edge)
+#' G <- setABM(agents = 3, stage = matrix(0, 3, 3))
 
 setABM <- function(
     agents = NULL,
-    net = NULL,
-    mat = NULL,
-    euc = NULL,
-    df = NULL,
-    other_field = NULL,
+    stage = NULL,
     active_binding_field = NULL,
     global_FUN = NULL,
     select_FUN = NULL,
@@ -110,7 +91,7 @@ setABM <- function(
     time = NULL,
     notes = NULL,
     init = list(agents = NULL,
-                net = NULL, mat = NULL, euc = NULL, df = NULL, other_field = NULL,
+                stage = NULL,
                 active_binding_field = NULL,
                 global_FUN = NULL, select_FUN = NULL, stop_FUN = NULL, update_FUN = NULL,
                 partial_update_FUN_body = NULL,
@@ -122,52 +103,19 @@ setABM <- function(
   }else{
     agents_sbs <- substitute(agents)
   }
-  agents_formatted <- .shape_agent(agents_sbs = agents_sbs)
+  agents_formatted <- .shape_agent(agents = agents,
+                                   agents_sbs = agents_sbs)
 
-  # net------------
-  if(!is.null(init$net)){
-    net <- init$net
-    net_sbs <- substitute(net)
+  # stage------------
+  if(!is.null(init$stage)){
+    stage <- init$stage
+    stage_sbs <- substitute(stage)
   }else{
-    net_sbs <- substitute(net)
+    stage_sbs <- substitute(stage)
   }
-  net_formatted <- .shape_net(net_sbs = net_sbs)
+  stage_formatted <- .shape_stage(stage = stage,
+                                  stage_sbs = stage_sbs)
 
-  # mat-----------
-  if(!is.null(init$mat)){
-    mat <- init$mat
-    mat_sbs <- substitute(mat)
-  }else{
-    mat_sbs <- substitute(mat)
-  }
-  mat_formatted <- .shape_mat(mat_sbs = mat_sbs)
-
-  # euc-----------
-  if(!is.null(init$euc)){
-    euc <- init$euc
-    euc_sbs <- substitute(euc)
-  }else{
-    euc_sbs <- substitute(euc)
-  }
-  euc_formatted <- .shape_euc(euc_sbs = euc_sbs)
-
-  # df-----------
-  if(!is.null(init$df)){
-    df <- init$df
-    df_sbs <- substitute(df)
-  }else{
-    df_sbs <- substitute(df)
-  }
-  df_formatted <- .shape_df(df_sbs = df_sbs)
-
-  # other_field----
-  if(!is.null(init$other_field)){
-    other_field <- init$df
-    other_sbs <- substitute(other_field)
-  }else{
-    other_sbs <- substitute(other_field)
-  }
-  other_formatted <- .shape_other(other_sbs = other_sbs)
 
   # active_binding_field---
   if(!is.null(init$active_binding_field)){
@@ -176,7 +124,9 @@ setABM <- function(
   }else{
     active_binding_field_sbs <- substitute(active_binding_field)
   }
-  active_binding_field_formatted <- .shape_active_binding_field(active_binding_field_sbs = active_binding_field_sbs)
+  active_binding_field_formatted <- .shape_active_binding_field(
+    active_binding_field = active_binding_field,
+    active_binding_field_sbs = active_binding_field_sbs)
 
   # global_FUN----
   if(!is.null(init$global_FUN)){
@@ -261,45 +211,47 @@ setABM <- function(
     }
   }
 
-  ## field_type
-  fields <- c(agents_formatted,
-      net_formatted, mat_formatted, euc_formatted,
-      df_formatted, other_formatted,
-      partial_update_FUN_body_formatted,
-      global_FUN_formatted, select_FUN_formatted,
-      stop_FUN_formatted, update_FUN_formatted)
-  field_type <- sapply(fields, function(x){attr(x, "field_type")})
+  ## field_category
+  field_category <- c(agents_formatted$category,
+                      stage_formatted$category,
+                      active_binding_field_formatted$category,
+                      global_FUN_formatted$category,
+                      select_FUN_formatted$category,
+                      stop_FUN_formatted$category,
+                      update_FUN_formatted$category,
+                      partial_update_FUN_body_formatted$category)
 
-  ## Dを生成する
-  D <- ABM_D$new(fields = c(agents_formatted,
-                            net_formatted, mat_formatted, euc_formatted,
-                            df_formatted, other_formatted,
-                            partial_update_FUN_body_formatted,
-                            time, notes = notes),
-                 methods = c(global_FUN_formatted, select_FUN_formatted,
-                             stop_FUN_formatted, update_FUN_formatted),
-                 log = log,
-                 field_type = field_type)
+  ## Gを生成する
+  G <- ABM_G$new(fields = c(agents_formatted$value,
+                            stage_formatted$value,
+                            partial_update_FUN_body_formatted$value,
+                            time),
+                 methods = c(global_FUN_formatted$value,
+                             select_FUN_formatted$value,
+                             stop_FUN_formatted$value,
+                             update_FUN_formatted$value),
+                 field_category = field_category,
+                 log = log, notes = notes)
 
   # active_bindingを処理する(NULLではない場合)
-  if(!is.null(active_binding_field_formatted)){
-    active <- assign_func_envs(active_binding_field_formatted, D$.__enclos_env__)
+  if(!is.null(active_binding_field_formatted$value)){
+    active <- assign_func_envs(active_binding_field_formatted$value, G$.__enclos_env__)
     for(name in names(active)){
-      makeActiveBinding(name, active[[name]], D$.__enclos_env__$self)
+      makeActiveBinding(name, active[[name]], G$.__enclos_env__$self)
     }
-    D$.__enclos_env__$.__active__ <- active
+    G$.__enclos_env__$.__active__ <- active
   }
 
   # logがNULLの場合には初期値を貼り付ける
-  if(is.null(D$log)){
-    D$.save()}
+  if(is.null(G$log)){
+    G$.save()}
 
   # 同じ名前のfieldがないかを確認し、あればストップをかける
-  check_name_tb <- table(ls(D))>1
+  check_name_tb <- table(ls(G))>1
   if(any(check_name_tb)){
     stop(paste0("The following field has a duplicated name. Please give each field a unique name: ", names(check_name_tb[check_name_tb])))
   }
 
-  # Dを返却する
-  D
+  # Gを返却する
+  G
 }

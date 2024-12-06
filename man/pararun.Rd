@@ -40,11 +40,12 @@ This is a wrapper function of \code{parLapply} in the \code{parallel} package.
 \examples{
 agent_attr <- data.frame(age = rep(0, 2))
 f <- function(){self$age <- self$age + 1}
-D <- setABM(agent_n = 2, agent_attr = agent_attr, agent_f = f)
-pararun(X = 1:3, expr = runABM(D = D), ncores = 2)
+agents <- init_agent(n = 2, attr_df = agent_attr, act_FUN = f)
+G <- setABM(agents = agents)
+pararun(X = 1:3, expr = runABM(G = G, schedule = "f"), ncores = 2)
 pararun(X = 1:3,
         expr = {
-          D_res <- runABM(D = D)
-          D_res$agent$ID1
+          G_res <- runABM(G = G)
+          G_res$agents$ID1
         }, ncores = 2)
 }

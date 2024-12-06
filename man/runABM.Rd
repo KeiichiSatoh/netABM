@@ -2,10 +2,10 @@
 % Please edit documentation in R/runABM.R
 \name{runABM}
 \alias{runABM}
-\title{Run the simulation based on the ABM_D object}
+\title{Run the ABM simulation}
 \usage{
 runABM(
-  D,
+  G,
   schedule = NULL,
   remove_field = NULL,
   rename_field = NULL,
@@ -17,80 +17,201 @@ runABM(
   add_tryCatch = TRUE,
   return_update_FUN = FALSE,
   saveRDS_inbetween = FALSE,
-  temp_E = NULL,
-  RDS_file_name = "D_temp.rds"
+  temp_E = TRUE,
+  RDS_file_name = "G_temp.rds",
+  log_place_holder = TRUE,
+  n_log_place_holder = 1000
 )
 }
 \arguments{
-\item{D}{a \code{ABM_D} class object.}
+\item{G}{An object of class \code{ABM_G}, representing the simulation environment.}
 
-\item{save_log}{logical; if the log of each run should be saved.
-The default is \code{FALSE}.}
+\item{schedule}{A character vector specifying the sequence of functions to
+execute during each simulation step. Defaults to \code{NULL}.}
 
-\item{selectFUN}{either a character of \code{"all"} or \code{"one"} or
-a user-defined function object about which agents to select for each time.}
+\item{remove_field}{A character vector of field names to remove from
+the \code{ABM_G} object. Defaults to \code{NULL}.}
 
-\item{stopFUN}{An integer or a user-defined function that
-determines when the simulation to stop. The default value \code{1} will
-result in running one simulation.}
+\item{rename_field}{A named character vector where names are
+new field names and values are the current field names.
+Defaults to \code{NULL}.}
 
-\item{updateFUN}{A user-defined function that
-determines how the update of the field will be done.
-The default value \code{NULL} will result in letting the selected agents
-defined in \code{selectFUN} act based on their \code{.f} of each agent.}
+\item{keep_field}{A character vector specifying fields to retain.
+Defaults to \code{NULL}.}
+
+\item{update_FUN_name}{The name of the update function to use,
+as a character scalar. If \code{NULL}, an update function
+is generated from the specification provided in \code{schedule}.
+Defaults to \code{NULL}.}
+
+\item{stop_FUN_name}{The name of the stopping function to use,
+as a character scalar. If \code{NULL}, the simulation stops after
+a specified number of steps defined in \code{times}. Defaults to \code{NULL}.}
+
+\item{times}{An integer specifying the number of simulation steps to run.
+Used if \code{stop_FUN_name} is not provided. Defaults to \code{1}.}
+
+\item{save_log}{Logical; if \code{TRUE}, logs each simulation step.
+Defaults to \code{FALSE}.}
+
+\item{add_tryCatch}{Logical; if \code{TRUE}, wraps function calls
+with \code{tryCatch} to handle errors gracefully. Defaults to \code{TRUE}.}
+
+\item{return_update_FUN}{Logical; if \code{TRUE},
+returns the update function along with the \code{ABM_G} object.
+Defaults to \code{FALSE}.}
+
+\item{saveRDS_inbetween}{Logical; if \code{TRUE},
+saves the \code{ABM_G} object as an RDS file at each step.
+Defaults to \code{FALSE}.}
+
+\item{temp_E}{Logical; whether to create a temporary environment \code{E}
+so that the \code{E} object can be referred to during the simulation.
+Defaults to \code{TRUE}.}
+
+\item{RDS_file_name}{A character scalar specifying the file name
+for saving the RDS file, used when \code{saveRDS_inbetween} is \code{TRUE}.
+Defaults to \code{"G_temp.rds"}.}
+
+\item{log_place_holder}{Logical; if both \code{save_log} and \code{log_place_holder}
+is \code{TRUE}, it creates a temporary copy of the log so that it will
+be overwritten during the simulation.}
+
+\item{n_log_place_holder}{An positive integer specifying the number of
+log_place_holder to create. Default is \code{1000}. This specification is used
+only when \code{times} is not defined.}
 }
 \value{
-a \code{ABM_D} class object
+A modified \code{ABM_G} object reflecting the simulation results.
 }
 \description{
-\code{runABM} let agents their action defined by \code{.f} of each agent
-in the \code{ABM_D} object.
+\code{runABM} runs a simulation using the \code{ABM_G} object.
+The simulation is driven by agent behaviors and various user-defined
+configurations.
 }
 \details{
-\code{runABM} is a simulator based on \code{ABM_D} object.
-In each run the selected agents act their action defined in \code{.f} of each agent.
+\code{runABM} runs a simulation using the \code{ABM_G} object.
+Users can customize the simulation by defining the update functions,
+stopping criteria, and scheduling behavior.
 
-Because the counting system of \code{R} starts from 1, \code{runABM} counts
-the initial time starts from 1, which means that the one run of the
-simulation corresponds to time 2.
+This function is designed with flexibility in mind,
+enabling users to perform exploratory analyses efficiently.
 
-The built-in \code{.selectFUN} are as follows:
+Specifically, it supports the following major features:
 \itemize{
-\item \code{"all"}: selecting all agents.
-\item \code{"one"}: Randomly selecting one agent in each time.
+\item Editing field names
+\item Configuring updates for each simulation step
+\item Managing the storage of updated objects
 }
 
-If user supplies its own stop function, the function should return the
-integer of each agent ID.
+Detailed explanations for each feature are provided below.
+\subsection{Setting Field Modification Arguments}{
 
-If user supplied an original function to \code{stopFUN}, it should return
-\code{TRUE} when the condition to stop is satisfied.
+These options are intended to allow users to predefine fields for
+various scenarios in \code{G}, making it easier to select fields according
+to the model. This eliminates the need to change the field names
+referenced by update functions for each model,
+enabling smoother simulations. The key points are as follows:
 
-If user supplied an own function to \code{updateFUN}, it should define
-how to update the object \code{D}.
-Notably, the default behavior of this function is that
-it internally creates a new function into which the supplied selectFUN
-and updateFUN is integrated in this order. Accordingly, if the user-defined
-updateFUN includes a procedure to select agents, be sure to set \code{selectFUN}
-as \code{NULL},
+Field modifications are applied in the following order:
+\code{rename_field}, \code{keep_field}, \code{remove_field}.
+A deep copy of \code{G} is created before these operations,
+ensuring that the original \code{G} object remains unchanged.
+\itemize{
+\item \code{rename_field}: Provide a named character vector in the format
+\code{c("new_field_name" = "old_field_name")}.
+For example, to rename \code{field_setting2} to \code{field},
+use \code{rename_field = c("field" = "field_setting2")}.
+You can rename multiple fields, such as
+\code{rename_field = c("field1" = "field_setting1_2", "field2" = "field_setting2_2")}.
+\item \code{keep_field}: Specify the fields to retain in the \code{G} object
+during simulation. This reduces the size of the output \code{G} object.
+For example, to retain only \code{field1} and \code{field2},
+use \code{keep_field = c("field1", "field2")}.
+\item \code{remove_field}: Specify the fields to remove in the \code{G} object
+during simulation. For example, to remove \code{field3} and \code{field4},
+use \code{remove_field = c("field3", "field4")}.
+}
+
+Users can specify multiple options simultaneously,
+but doing so may lead to errors. It is generally recommended to use only
+one option at a time.
+}
+
+\subsection{\code{update_FUN} and \code{schedule}}{
+
+Update functions must be preconfigured in \code{G},
+such as \code{update_FUN}, \code{select_FUN}, \code{global_FUN},
+\code{agent_FUN}, or \code{partial_update_FUN_body}.
+You can check what is available in \code{G} by printing it.
+
+Users can specify one \code{update_FUN} field name categorized
+as \code{update_FUN} by providing its name as a character string
+to \code{update_FUN_name}.
+
+If \code{update_FUN_name} is not used, users can specify a
+sequence of function names as a character vector in \code{schedule}.
+This creates an \code{update_FUN} internally, executed in the specified order.
+Note that \code{select_FUN} must precede \code{agent_FUN};
+if not specified, a default \code{select_FUN} selecting all agents is
+automatically added.
+
+If neither \code{update_FUN_name} nor \code{schedule} is provided,
+\code{runABM} automatically selects the first suitable \code{update_FUN}
+candidate from \code{G$.field_list()}.
+
+To handle unexpected errors during simulations,
+\code{runABM} by default wraps \code{update_FUN} with \code{tryCatch},
+which returns \code{NULL} on errors, allowing the simulation to continue.
+While convenient, this may make it harder to detect fundamental issues
+in the update function.
+
+To inspect the exact \code{update_FUN} used,
+set \code{return_update_FUN = TRUE}.
+The update_FUN used in the simulation is stored into \code{G$notes$update_FUN_used}.
+}
+
+\subsection{Log Storage}{
+
+If intermediate states are of interest,
+set \code{save_log = TRUE} to log each update step.
+Note that logging may increase the simulation runtime.
+
+To mitigate memory allocation issues caused by creating new objects
+during each update, \code{runABM} pre-allocates memory for logs
+by initializing placeholders in \code{G$log}.
+By default, 1000 placeholders are created
+(modifiable via \code{n_log_place_holder}). To disable this behavior, set \code{log_place_holder = FALSE}.
+}
+
+\subsection{Notes on Saving RDS Files}{
+
+For long-running simulations, consider to use \code{saveRDS_inbetween = TRUE}
+to save the \code{G} object as an RDS file after each update step.
+Specify the file name using \code{RDS_file_name}.
+Note that saving files increases simulation runtime.
+}
+
+\subsection{Simulation Runtime}{
+
+The runtime of \code{runABM} is displayed in the console upon completion.
+This excludes preprocessing time for field modifications
+and \code{update_FUN} construction.
+The runtime is stored into \code{G$note$simulation_took}.
+}
 }
 \examples{
-Data for the agent attributes and agent behavior
-agent_attr <- data.frame(
-age = c(0, 1, 2, 3, 4),
-sex = c("m","m","m","f","f"))
+# Example setup
+agent_attr <- data.frame(age = c(0, 1, 2), sex = c("m", "f", "m"))
+agent_behavior <- function() { self$age <- self$age + 1 }
 
-# Behavior 1: Agent gets older by beta in each time in a simulation.
-agent_get_older <- function(beta = 1){self$age <- self$age + beta}
-Set the default behavior
-D1 <- setABM(agent_n = 3, agent_f = agent_get_older)
+# Initialize the ABM environment
+G <- setABM(agent_n = 3, agent_f = agent_behavior)
 
-# Example 1: Select all agents in each run
-D1_1 <- runABM(D = D1, selectFUN = "all", save_log = TRUE)
+# Run simulation for 5 steps
+result <- runABM(G = G, times = 5)
 
-# Example 2: Select one agent in each run
-D1_2 <- runABM(D = D1, selectFUN = "one", save_log = TRUE)
-}
-\author{
-Keiichi Satoh
+# Run simulation with custom stopping condition
+stop_condition <- function(G, E) { G$time > 10 }
+result <- runABM(G = G, stop_FUN_name = stop_condition)
 }

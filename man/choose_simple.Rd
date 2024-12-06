@@ -30,6 +30,11 @@ This function bypasses certain preparatory procedures within "sample.int" and
 is specifically optimized for scalar selection,
 achieving approximately 1.5 to 2 times faster performance.
 }
+\examples{
+x <- c("A", "B", "C")
+prob <- c(0.3, 0.6, 0.1)
+choose_simple(x = x, prob = prob)
+}
 \seealso{
 \link{sample(base)}
 }
