@@ -104,11 +104,11 @@ game_schelling_segregation <- function(
   if (!is.na(tol) && tol < 0) {
     stop("tol must be a non-negative numeric value.")
   }
-  if (play_movie == TRUE && do_plot == FALSE) {
+  if (save_GIF == TRUE && do_plot == FALSE) {
     do_plot <- TRUE
   }
-  if (play_movie == TRUE && save_log == FALSE) {
-    warning("'play_movie' is active only when 'save_log = TRUE'. Set 'save_log = TRUE' to enable 'play_movie'.")
+  if (save_GIF == TRUE && save_log == FALSE) {
+    warning("'save_GIF' is active only when 'save_log = TRUE'. Set 'save_log = TRUE' to enable 'save_GIF'.")
   }
 
   # Ensure the sum of group_prop is 1
