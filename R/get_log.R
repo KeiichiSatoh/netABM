@@ -79,7 +79,7 @@ get_log <- function(expr, G = NULL, log = NULL, FUN = NULL, ...,
 
   # logを取得する
   result <- lapply(log, function(i) {
-    eval(parse(text = paste0(expr_base, "$log", "[[", i, "]]$", expr_rest)))
+    eval(parse(text = paste0(substitute(base_obs), "$log", "[[", i, "]]$", expr_rest)))
   })
 
   # FUN
