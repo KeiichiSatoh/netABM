@@ -10,7 +10,7 @@ game_schelling_segregation(
   group_prop = c(0.5, 0.5),
   minimum_same_prop = 0.3,
   max_time = 100,
-  tol = 0.01,
+  tol = 0.001,
   save_log = FALSE,
   do_plot = FALSE,
   plot_sec = 1,

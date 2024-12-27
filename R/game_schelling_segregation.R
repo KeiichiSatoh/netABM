@@ -75,7 +75,7 @@ game_schelling_segregation <- function(
     group_prop = c(0.5, 0.5),
     minimum_same_prop = 0.3,
     max_time = 100,
-    tol = 0.01,
+    tol = 0.001,
     save_log = FALSE,
     do_plot = FALSE,
     plot_sec = 1,
@@ -240,9 +240,9 @@ game_schelling_segregation <- function(
     n_category <- length(group_prop) + 1
     category_label <- c("0 (vacant)", 1:(n_category - 1))
     color_palette <- if (n_category <= 3) {
-      c("white", "red", "blue")
+      c("white", "#E41A1C", "#377EB8")
     } else {
-      c("white", RColorBrewer::brewer.pal(n_category - 1, "Set3"))
+      c("white", RColorBrewer::brewer.pal(n_category - 1, "Set1"))
     }
 
     if (save_log) {
