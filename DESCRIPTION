@@ -23,6 +23,9 @@ Imports:
     sna,
     vctrs,
     dplyr,
-    dqrng
+    dqrng,
+    Rcpp
 Depends: 
     R (>= 2.10)
+LinkingTo: 
+    Rcpp
