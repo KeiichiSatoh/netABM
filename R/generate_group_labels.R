@@ -12,7 +12,7 @@
 #' when adjusting counts. Must match one of the group labels.
 #' @param random_adjustment Logical. If `TRUE`, adjustments are
 #' made randomly across groups when `adjustment_by` is not specified.
-#' Default is `TRUE`.
+#' Default is \code{TRUE}.
 #'
 #' @return A character or integer vector of length `n`,
 #' containing the group labels for each item.
