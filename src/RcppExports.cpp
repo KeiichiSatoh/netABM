@@ -10,6 +10,32 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
+// cpp_calc_neib_prop
+NumericMatrix cpp_calc_neib_prop(IntegerVector ego_ID, IntegerMatrix neib_list, IntegerVector neib_attr);
+RcppExport SEXP _netABM_cpp_calc_neib_prop(SEXP ego_IDSEXP, SEXP neib_listSEXP, SEXP neib_attrSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< IntegerVector >::type ego_ID(ego_IDSEXP);
+    Rcpp::traits::input_parameter< IntegerMatrix >::type neib_list(neib_listSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type neib_attr(neib_attrSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_calc_neib_prop(ego_ID, neib_list, neib_attr));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_move_same_ethnicity
+List cpp_move_same_ethnicity(IntegerMatrix agent_profile, IntegerMatrix place_profile, IntegerMatrix neib_place_id);
+RcppExport SEXP _netABM_cpp_move_same_ethnicity(SEXP agent_profileSEXP, SEXP place_profileSEXP, SEXP neib_place_idSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< IntegerMatrix >::type agent_profile(agent_profileSEXP);
+    Rcpp::traits::input_parameter< IntegerMatrix >::type place_profile(place_profileSEXP);
+    Rcpp::traits::input_parameter< IntegerMatrix >::type neib_place_id(neib_place_idSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_move_same_ethnicity(agent_profile, place_profile, neib_place_id));
+    return rcpp_result_gen;
+END_RCPP
+}
 // neib8_rcpp
 NumericMatrix neib8_rcpp(NumericMatrix mat, IntegerMatrix posit_ind, bool include_ego);
 RcppExport SEXP _netABM_neib8_rcpp(SEXP matSEXP, SEXP posit_indSEXP, SEXP include_egoSEXP) {
@@ -23,9 +49,37 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// select_draft
+CharacterVector select_draft(NumericMatrix x, int size);
+RcppExport SEXP _netABM_select_draft(SEXP xSEXP, SEXP sizeSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type x(xSEXP);
+    Rcpp::traits::input_parameter< int >::type size(sizeSEXP);
+    rcpp_result_gen = Rcpp::wrap(select_draft(x, size));
+    return rcpp_result_gen;
+END_RCPP
+}
+// subset_by_rowid
+DataFrame subset_by_rowid(DataFrame df, IntegerVector row_ids);
+RcppExport SEXP _netABM_subset_by_rowid(SEXP dfSEXP, SEXP row_idsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< DataFrame >::type df(dfSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type row_ids(row_idsSEXP);
+    rcpp_result_gen = Rcpp::wrap(subset_by_rowid(df, row_ids));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_netABM_cpp_calc_neib_prop", (DL_FUNC) &_netABM_cpp_calc_neib_prop, 3},
+    {"_netABM_cpp_move_same_ethnicity", (DL_FUNC) &_netABM_cpp_move_same_ethnicity, 3},
     {"_netABM_neib8_rcpp", (DL_FUNC) &_netABM_neib8_rcpp, 3},
+    {"_netABM_select_draft", (DL_FUNC) &_netABM_select_draft, 2},
+    {"_netABM_subset_by_rowid", (DL_FUNC) &_netABM_subset_by_rowid, 2},
     {NULL, NULL, 0}
 };
 

@@ -1,5 +1,5 @@
 #' @title Modifying a set of ABM_Agent class objects
-#' @description
+#' @description This function modifies ABM_Agent class objects
 #' @details
 #' "rename"や"remove"を行う場合には、注意が必要。もしもこれらのフィールドを、
 #' act_FUNやactive_bindingが参照している場合にはオブジェクトが適切に動かなくなる。

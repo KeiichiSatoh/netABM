@@ -12,43 +12,43 @@
 # リストの名前は、アクション名として扱う。名前がない場合には、act1, act2と順につける。
 #-------------------------------------------------------------------------------
 
-
 .shape_act_FUN <- function(act_FUN, act_FUN_sbs, n){
   if(is.null(act_FUN)){
     return(NULL)
   }
-  # リストかどうか
-  if(!is.list(act_FUN)){
-    ## リストではない場合
-    ## 第一階層が1、第二階層がnとなるlistを作成するようにlapplyを用いる
-    out <- vector("list", 1)
 
-    ## act_FUNの長さに応じてoutに関数の中身を貼り付ける
-    if(length(act_FUN)==1){
-      ### act_FUNの長さが1の場合
-      out[[1]] <- lapply(1:n, function(x){.get_act_FUN(FUN = act_FUN)})
-    }else if(length(act_FUN) >= 2){
-      ### act_FUNの長さが2以上の場合
-      stopifnot("Length of act_FUN does not match n." = length(act_FUN)==n)
-      out[[1]] <- lapply(act_FUN, function(x){.get_act_FUN(FUN = x)})
-    }else{
-      ### それ以外の場合
-      stop("The length of act_FUN must be equal to 1 or more.")
-    }
-    ## リストではない場合:ここまで------
+  # 行動ルールの長さを測る
+  n_act <- length(act_FUN)
+
+  # 各行動のアウトプット用リストを作成する
+  out <- vector("list", n_act)
+
+  # リストかどうかを判定する
+  if(!is.list(act_FUN)){
+  ## リストではない場合--------
+    # 単一行動ルール、アクターによる差異なしと判定できるため、そのように処理
+    out[[1]] <- lapply(1:n, function(x){.get_act_FUN(FUN = act_FUN)})
   }else{
-    ## リストである場合
-    out <- lapply(X = act_FUN, FUN = function(X){
-      if(length(X)==1){
-        lapply(1:n, function(i){.get_act_FUN(FUN = X)})
-      }else if(length(X) >= 2){
-        stopifnot("Length of the element within list of act_FUN must match n." = length(x)==n)
-        lapply(X, function(y){.get_act_FUN(FUN = y)})
+  ## リストの場合---------------
+    ## 各リストの第一階層ごとに処理を行う
+    for(p in 1:n_act){
+      if(!is.list(act_FUN[[p]])){
+        ### リストではない場合：アクターによる差異なし
+        out[[p]] <- lapply(1:n, function(x){.get_act_FUN(FUN = act_FUN[[p]])})
       }else{
-        stop("Length of the element within list of act_FUN must match n.")
+        ### リストである場合：アクターによる差異あり
+        if(length(act_FUN[[p]])==1){
+          #### リストの中身は1個のみ：人数分コピーする
+          out[[p]] <- lapply(1:n, function(x){.get_act_FUN(FUN = act_FUN[[p]])})
+        }else if(length(act_FUN[[p]])==n){
+          #### リストの中身は人数分ある：各中身を張り付ける
+          out[[p]] <- act_FUN[[p]]
+        }else{
+          stop("Length of the element within list of act_FUN must match n.")
+        }
       }
-    })
-  } ## リストである場合：ここまで-------
+    }
+  }
 
   # 名前をoutの第一階層に付加する
   if(is.null(names(act_FUN))){
@@ -72,6 +72,14 @@
     ## namesがact_FUNについている場合
     stopifnot("Names must be provided for each list element." = length(names(act_FUN))==length(out))
     names(out) <- names(act_FUN)
+  }
+
+  # outに付与されているact_FUNが関数かどうかを確認する
+  for(p in 1:length(out)){
+    check <- all(unlist(lapply(1:n, function(i){is.function(out[[p]][[i]])})))
+    if(check==FALSE){
+      stop(paste0("Some of the objects nested under the ", p, "-th element of act_FUN are not functions."))
+    }
   }
 
   # アウトプット
