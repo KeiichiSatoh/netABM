@@ -1,0 +1,512 @@
+}
+if (length(preference_SES) != n_resident) {
+stop("'preference_SES' の長さは 'n_resident' と一致する必要があります。")
+}
+# 行動のみからなるresident_dummyを作成
+resident_dummy = init_agent(n = n_resident,
+act_FUN = act_FUN)
+# 属性データフレームの作成
+resident<- data.frame(
+resident_ID = 1:n_resident,
+ethnicity = ethnicity,
+SES = SES,
+preference_ethnicity = preference_ethnicity,
+preference_SES = preference_SES
+)
+# 家の割り当て準備
+city_dim <- dim(restriction)
+house_index <- array(1:prod(city_dim), dim = city_dim)
+house_index[is.na(restriction)] <- NA
+house <- array(0, dim = city_dim)
+house[is.na(restriction)] <- NA
+# 家の割り当て
+if (all(restriction[!is.na(restriction)] == 0)) {
+# 制約がない場合
+index <- na.exclude(as.vector(house_index))
+selected_index <- sample(index, size = n_resident)
+house[selected_index] <- 1:n_resident
+} else {
+# 制約がある場合
+order_id <- sample(1:n_resident)
+for (i in 1:n_resident) {
+candid_house <- which(
+house == 0 & (restriction == 0 | restriction == attr_df$ethnicity[order_id[i]])
+)
+if (length(candid_house) == 0) {
+stop(sprintf("Resident %d に割り当て可能な家がありません。", order_id[i]))
+}
+selected_house <- candid_house[sample(length(candid_house), 1)]
+house[selected_house] <- order_id[i]
+}
+}
+# 出力
+out <- list(
+resident = resident,
+house = house,
+resident_dummy = resident_dummy
+)
+return(out)
+}
+#-------------------------------------------------------------
+# create_seg_game
+#-------------------------------------------------------------
+create_seg_game <- function(
+city,
+landlord_out,
+resident_out,
+active_binding_field = NULL,
+global_FUN = list(make_restriction = make_restriction),
+select_FUN = list(select_prop25_resident = select_prop25_resident),
+stop_FUN = NULL,
+update_FUN = NULL,
+partial_update_FUN_body = NULL) {
+# 入力引数のバリデーション
+if (!is.array(city)) {
+stop("'city'は配列である必要があります。")
+}
+if (!is.list(landlord_out) || !all(c("landlord", "ownership", "restriction") %in% names(landlord_out))) {
+stop("'landlord_out'は必要な要素（landlord, ownership, restriction）を含むリストである必要があります。")
+}
+if (!is.list(resident_out) || !all(c("resident","house") %in% names(resident_out))) {
+stop("'resident_out'は'resident'と'house'を含むリストである必要があります。")
+}
+# city, house, residentがすべて同じ次元であること
+stopifnot("'city'と'landlord$restriction'の次元が異なります" = dim(city)==dim(landlord_out$restriction))
+stopifnot("'city'と'landlord$ownership'の次元が異なります" = dim(city)==dim(landlord_out$ownership))
+stopifnot("'city'と'resident$house'の次元が異なります" = dim(city)==dim(resident_out$house))
+# residentのhouseのアドレスを取得
+house_address <- rep(NA, nrow(resident_out$resident))
+for(i in 1:nrow(resident_out$resident)){
+house_address[i] <- which(resident_out$resident$resident_ID[i]==resident_out$house)
+}
+# landlord, residentのdata.tableを作成する
+landlord_dt <- data.table::as.data.table(landlord_out$landlord)
+resident_dt <- data.table::as.data.table(data.frame(resident_out$resident, place_ID = house_address))
+setkey(landlord_dt, landlord_ID)
+setkey(resident_dt, resident_ID, place_ID)
+# 各土地のdata.tableを作成する
+place_dt <- data.table::data.table(
+place_ID = 1:length(as.vector(city)),
+zone = as.vector(city),
+landlord_ID = as.vector(landlord_out$ownership),
+restriction = as.vector(landlord_out$restriction),
+resident_ID = as.vector(resident_out$house),
+resident_ethnicity = 0,
+resident_SES = 0
+)
+setkey(place_dt, place_ID, landlord_ID, resident_ID)
+# 各土地に借り主のresidentのethnicityとSESを登録する
+place_dt[resident_dt$place_ID, "resident_ethnicity"] <- resident_dt$ethnicity
+place_dt[resident_dt$place_ID, "resident_SES"] <- resident_dt$SES
+place_dt[is.na(place_dt$resident_ID),c("resident_ethnicity","resident_SES")] <- NA
+# 各土地の8方向および上方／下方隣接セルのIDリスト
+city_dim <- dim(city)
+max_neib <- 9*city_dim[3] - 1
+city_id <- array(1:length(as.vector(city)), dim = dim(city))
+city_id2_list <- lapply(1:city_dim[3], function(k){
+city_id2 <- cbind(city_id[,,k],0)
+rbind(city_id2, 0)
+})
+city_id3 <- array(0, dim = c(city_dim[1] + 1, city_dim[2] + 1, city_dim[3]))
+for(k in 1:city_dim[3]){
+city_id3[,,k] <- city_id2_list[[k]]
+}
+neib_id <- lapply(1:prod(city_dim), function(p){
+p_ind <- which(city_id == p, arr.ind = TRUE)
+p_neib <- c()
+for(k in 1:city_dim[3]){
+new_neib <- c(
+city_id3[p_ind[1] - 1, p_ind[2] - 1, k],
+city_id3[p_ind[1]    , p_ind[2] - 1, k],
+city_id3[p_ind[1] + 1, p_ind[2] - 1, k],
+city_id3[p_ind[1] - 1, p_ind[2]    , k],
+city_id3[p_ind[1]    , p_ind[2]    , k],
+city_id3[p_ind[1] + 1, p_ind[2]    , k],
+city_id3[p_ind[1] - 1, p_ind[2] + 1, k],
+city_id3[p_ind[1]    , p_ind[2] + 1, k],
+city_id3[p_ind[1] + 1, p_ind[2] + 1, k]
+)
+p_neib <- c(p_neib, new_neib)
+}
+# 自身は0に置き換える
+p_neib <- p_neib[-which(p_neib==p)]
+# 長さの足らない分は0を足す
+p_neib <- c(p_neib, rep(0, max_neib - length(p_neib)))
+# リターン
+p_neib
+})
+neib_id <- do.call(rbind, neib_id)
+# neib_idのうち、NA扱いのものは0にする
+na_place_ID <- place_dt[is.na(place_dt$zone), place_ID]
+neib_id[neib_id %in% na_place_ID] <- 0  # NAとなっているplace_IDは0に
+neib_id[na_place_ID, ] <- 0             # NAとなっているplace_IDは隣接IDを持たないように0に
+neib_id_dt <- data.table(neib_id)
+# 同じ地域の他のIDをキャッシュする
+max_nei <- max(table(city))
+nei <- matrix(0, nrow(place_dt), max_nei)
+for(i in 1:nrow(place_dt)){
+nei_ID_i <- which(place_dt$zone[i]==place_dt$zone)
+nei_ID_i <- nei_ID_i[-nei_ID_i[nei_ID_i==i]]  # 自身のIDを抜く
+nei[i, ] <- c(nei_ID_i, rep(0, max_nei - length(nei_ID_i)))
+}
+nei_dt <- data.table(nei)
+# その他の基本的なセッティングをキャッシュしておく
+settings <- list(
+n_resident = nrow(resident_dt),
+n_vacant_place = nrow(place_dt[J(0), on = "resident_ID"]),
+city_dim = dim(city))
+# エージェントベースモデルの設定
+G <- setABM(
+agents = resident_out$resident_dummy,
+stage = list(
+resident = resident_dt,
+landlord = landlord_dt,
+place = place_dt,
+neib_place_id = neib_id_dt,
+nei_place_id = nei_dt,
+settings = settings
+),
+active_binding_field = active_binding_field,
+global_FUN = global_FUN,
+select_FUN = select_FUN,
+stop_FUN = stop_FUN,
+update_FUN = update_FUN,
+partial_update_FUN_body = partial_update_FUN_body
+)
+# データの要約を取得する内部関数
+get_descriptive <- function(X) {
+if (!is.data.frame(X)) stop("入力はデータフレームである必要があります。")
+apply(X, 2, function(X_i) {
+round(c(mean = mean(X_i, na.rm = TRUE),
+sd = sd(X_i, na.rm = TRUE),
+min = min(X_i, na.rm = TRUE),
+max = max(X_i, na.rm = TRUE)), 1)
+}) |> t()
+}
+# 出力の要約
+cat("<Summary of the Input>", "\n")
+cat("[City Structure]", "\n")
+cat("Dimensions         :", dim(city), "\n")
+cat("Land per zone      :", sum(city[,,1] == 1, na.rm = TRUE), "\n")
+cat("Total houses       :", sum(!is.na(city)), "\n")
+cat("Vacant houses (%)  :", round((sum(G$place$resident_ID == 0, na.rm = TRUE) / sum(!is.na(city))) * 100, 1), "\n")
+cat("No restrictions (%):", round((sum(G$place$restriction == 0, na.rm = TRUE) / sum(!is.na(city))) * 100, 1), "\n")
+cat("\n")
+cat("[Landlord (n =", NROW(G$landlord), ")]", "\n", sep = "")
+cat("Ownership share (%) :", round(prop.table(table(G$place$landlord_ID)) * 100, 1), "\n")
+print(get_descriptive(G$landlord[,-1]))
+cat("\n")
+cat("[Resident (n =", NROW(G$resident), ")]", "\n", sep = "")
+cat("Ethnicity (%) :", round(prop.table(table(G$resident$ethnicity)) * 100, 1), "\n")
+print(get_descriptive(G$resident[,3:5]))
+# モデルを返す
+return(G)
+}
+################################################################################
+# Functions related to summarizing the results
+################################################################################
+#-----------------------------
+# library
+#-----------------------------
+library(segregation)
+#-------------------------------------------------------------------------------
+# D_index
+#-------------------------------------------------------------------------------
+city_D_index <- function(G, log = NULL){
+# 内部で使用する関数を先に定義
+.get_D_index <- function(G){
+tb <- table(G$place$zone, G$place$resident_ethnicity)
+tb <- tb[ ,c("1","2")]
+tb_df <- as.data.frame(tb)
+d_ind <- segregation::dissimilarity(tb_df, unit = "Var1", group = "Var2", weight = "Freq")
+d_ind$est
+}
+# インプットに応じてlogからとる場合
+if(is.null(log)){
+## log = NULL: 現在からとる
+return(.get_D_index(G))
+}else{
+out <- unlist(lapply(log, function(t){.get_D_index(G$log[[t]])}))
+names(out) <- log
+return(out)
+}
+}
+landlord_D_index <- function(G, log = NULL){
+# 内部で使用する関数を先に定義
+.get_D_index <- function(G){
+tb <- table(G$place$landlord_ID, G$place$resident_ethnicity)
+tb <- tb[ ,c("1","2")]
+tb_df <- as.data.frame(tb)
+d_ind <- segregation::dissimilarity(tb_df, unit = "Var1", group = "Var2", weight = "Freq")
+d_ind$est
+}
+# インプットに応じてlogからとる場合
+if(is.null(log)){
+## log = NULL: 現在からとる
+return(.get_D_index(G))
+}else{
+out <- unlist(lapply(log, function(t){.get_D_index(G$log[[t]])}))
+names(out) <- log
+return(out)
+}
+}
+#-------------------------------------------------------------------------------
+# city_map: eth1が多い地域は赤、eth2が多い地域は青に
+#-------------------------------------------------------------------------------
+library(reshape2)
+library(ggplot2)
+ethnicity_map <- function(G, log = NULL) {
+.ethnicity_mapper <- function(G){
+city <- array(G$place[["resident_ethnicity"]], G$settings$city_dim)
+city_eth_map <- apply(city, c(1,2), function(x){
+n <- length(x)
+eth1_prop <- sum(x == 1, na.rm = TRUE)/n
+eth2_prop <- sum(x == 2, na.rm = TRUE)/n
+eth1_prop - eth2_prop
+})
+melted_dat <- reshape2::melt(city_eth_map)
+out <- ggplot(data = melted_dat,
+aes(x = Var1, y = Var2, fill = value)) + geom_tile() +
+scale_fill_gradient2(low = "blue", high = "red") +
+theme_bw() +
+theme(axis.title.x = element_blank(),
+axis.title.y = element_blank()) +
+ggtitle(paste("time =", G$time))
+print(out)
+}
+if (is.null(log)) {
+.ethnicity_mapper(G)
+} else {
+for (t in log) {
+.ethnicity_mapper(G$log[[t]])
+}
+}
+}
+city <- create_city(zone_dim = c(2,2), lot_dim = c(3,3), max_height = 2, height_prop = c(.5, .5))
+landlord_out <- create_landlord(city = city, n_landlord = 5,
+aversion = c(0,0,0,1,1),
+global_landlord = c(0,0,0,1,1))
+resident_out <- create_resident(restriction = landlord_out$restriction, n_resident = 20,
+ethnicity = c(rep(1, 10), rep(2, 10)),
+SES = c(rep(1, 5), rep(2, 5), rep(3, 5), rep(4, 5)),
+preference_ethnicity = rep(5, 20),
+preference_SES = rep(5, 20))
+G <- create_seg_game(city = city, landlord_out = landlord_out,
+resident_out = resident_out)
+# オーナーによる土地の制約がかかった状態で移動させる
+G$place
+# オーナーによる土地の制約がかかった状態で移動させる
+G$place$restriction # 初期状態で見てみると制約はかかっていない（
+G$make_restriction()  # オーナーのaversionに従って所有土地に制約をかける
+G$make_restriction(G = G)  # オーナーのaversionに従って所有土地に制約をかける
+G
+G$make_restriction(G = G, E = E)  # オーナーのaversionに従って所有土地に制約をかける
+# オーナーによる土地の制約がかかった状態で移動させる
+E <- new.env()
+G$make_restriction(G = G, E = E)  # オーナーのaversionに従って所有土地に制約をかける
+G$place$restriction   # 初期状態で見てみると制約はかかっていない
+# 後は通常通りシミュレーションをかける
+G_act1_aversion <- runABM(G = G, schedule = c("move_random"), times = 5)
+# オーナーのaversionが毎回確率的に変化するため、スケジュールの中に組み込む必要がある
+G_act1_aversion2 <- runABM(G = G,
+schedule = c("make_restriction", "move_random"), times = 5)
+# act1 (ランダム)
+G_act1_prop25 <- runABM(G = G, schedule = c("select_prop25_resident", "move_random"), times = 5)
+G
+# act2 (同じエスニシティがいる場所を好む)
+G_act2_nei <- runABM(G = G, schedule = c("move_same_ethnicity_nei"), times = 5)
+G_act1_SESrestricted <- runABM(G = G, schedule = c("move_random_SESrestricted"), times = 5,
+save_log = FALSE)  # 途中経過も確認するならばTRUEに（ただし速度は遅くなる）
+# サンプルとして10回分シミュレーションを行う
+G_act2 <- runABM(G = G, schedule = c("move_random"), times = 10)
+# サンプルとして10回分シミュレーションを行う
+G_act2 <- runABM(G = G, schedule = c("move_same_ethnicity"), times = 10)
+# 現在の町レベルのD指標
+city_D_index(G)
+city_D_index(G, log = 1:11)
+# サンプルとして10回分シミュレーションを行う
+G_act2 <- runABM(G = G, schedule = c("move_same_ethnicity"), times = 10,
+save_log = TRUE)
+# 現在の町レベルのD指標
+city_D_index(G = G_act2)
+city_D_index(G = G_act2, log = 1:11)
+city_D_index(G = G_act2, log = 1:11)   # 経時的変化
+# 地主レベルのD指標
+landlord_D_index(G = G_act2)               # 最終値
+landlord_D_index(G = G_act2, log = 1:11)   # 経時的変化
+# エスニシティマップ（各土地の各エスニシティの土地平面単位の割合を示す）
+ethnicity_map(G = G_act2)
+# エスニシティマップ（各土地の各エスニシティの土地平面単位の割合を示す）
+# (赤はエスニック１、青はエスニック２。いずれも濃いほうが、当該エスニック集団が多いことを示す)
+ethnicity_map(G = G_act2)
+ethnicity_map(G = G_act2, log = 1:11)      # 経時的変化
+?pararun
+# 並列計算
+para_act1 <- pararun(X = 1:3,              # 三つ分シミュレーション
+expr = runABM(G = G,
+schedule = c("move_random")),
+ncores = 3)　　　　　 # 使用するコア数
+para_act1
+# その他の情報（今回はすべてdata.frame形式になっているため、そのまま加工可能です）
+G_act2$landlord
+G_act2$resident # 住民に関する情報
+G_act2$place    # 土地に関する状況（NAは一軒家などで人がすめない設定になっていることを示す）
+# 土地に関する情報から、町を再度再現したい場合
+# settingsフィールドに町の次元が含まれているため、こちらとセットで作成する
+# 以下は、ethnicityで数字をつけられた町を再現する例
+array(G_act2$place$resident_ethnicity, dim = G_act2$settings$city_dim)
+library(devtools)
+load_all()
+agent_attribute <- data.frame(age = c(10, 11),       # 年齢
+height = c(1.0, 1.1),　# 身長（m）
+weight = c(30, 40),    # 体重（kg）
+beta = c(1, 2)         # 身長成長パラメーター
+)
+agent_attribute
+decision <- sample(c(1,0))
+agent_attribute <- data.frame(age = c(10, 11),       # 年齢
+height = c(1.0, 1.1),　# 身長（m）
+weight = c(30, 40),    # 体重（kg）
+beta = c(1, 2)         # 身長成長パラメーター
+)
+get_taller <- function(beta = self$beta){self$weight <- self$weight + beta}
+get_taller
+gain_weight1 <- function(){self$weight <- self$weight + 1} #1番目のエージェントの行為ルール
+gain_weight2 <- function(){
+decision <- sample(c(1,0))         # 0か1かをランダムに選ぶ
+if(decision==1){　　　　　　　　　　 # decision=1の場合には体重が１増える
+self$weight <- self$weight + 1
+}else{　　　　　　　　　　　　　　　　# decision=0の場合には体重が１減る
+self$weight <- self$weight - 1
+}
+}
+BMI <- function(){self$weight/self$height^2}
+init_agent(attr_df = agent_attribute,
+act_FUN = list(get_taller = get_taller,
+gain_weight = list(gain_weight1, gain_weight2)))
+init_agent(attr_df = agent_attribute,
+act_FUN = list(get_taller = get_taller,
+gain_weight = list(gain_weight1, gain_weight2)),
+active_binding_field = BMI)
+agents <- init_agent(attr_df = agent_attribute,
+act_FUN = list(get_taller = get_taller,
+gain_weight = list(gain_weight1, gain_weight2)),
+active_binding_field = BMI)
+agents$ID1$print()
+agents$ID1$print
+agents$ID1$gain_weight()
+agents$ID1$gain_weight
+agents$ID2$gain_weight
+agents <- init_agent(attr_df = agent_attribute,
+act_FUN = list(get_taller = get_taller,
+gain_weight = list(gain_weight1, gain_weight2)),
+active_binding_field = BMI)
+agents
+init_agent(active_binding_field = c(BMI, BMI))
+init_agent(n = 2, active_binding_field = c(BMI, BMI))
+init_agent(n = 2, active_binding_field = list(BMI, BMI))
+agents <- init_agent(attr_df = agent_attribute,
+act_FUN = list(get_taller = get_taller,
+gain_weight = list(gain_weight1, gain_weight2)),
+active_binding_field = BMI)
+G <- setABM(agents = agents)
+G$.agent_attr(agents = agents, attr = "weight")
+agents
+G$.agent_attr(agents = "agents", attr = "weight")
+G$.agent_attr(agents = "agents", attr = "weight")
+agent_weight <- G$.agent_attr(agents = "agents", attr = "weight")
+unlist(agent_weight)
+mean(agent_weight)
+agent_weight <- unlist(agent_weight)    # リスト形式なので、ベクトルに直す
+mean(agent_weight)
+setABM(agents = agents,
+stage = list(year = year),                             # stage = yearのように書いても可
+active_binding_field = list(avg_weight = avg_weight),  # ctive_binding_field = avg_weightのように書いても可
+global_FUN = list(time_passes = time_passes)           # global_FUN = time_passesのように書いても可
+)
+avg_weight <- function(){
+agent_weight <- G$.agent_attr(agents = "agents", attr = "weight")
+agent_weight <- unlist(agent_weight)    # リスト形式なので、ベクトルに直す
+mean(agent_weight)
+}
+setABM(agents = agents,
+stage = list(year = year),                             # stage = yearのように書いても可
+active_binding_field = list(avg_weight = avg_weight),  # ctive_binding_field = avg_weightのように書いても可
+global_FUN = list(time_passes = time_passes)           # global_FUN = time_passesのように書いても可
+)
+avg_weight
+setABM(agents = agents,
+stage = list(year = year),  # ctive_binding_field = avg_weightのように書いても可
+global_FUN = list(time_passes = time_passes)           # global_FUN = time_passesのように書いても可
+)
+setABM(agents = agents)
+setABM(agents = agents,
+stage = year)
+year
+current_year <- 1990
+setABM(agents = agents,
+stage = list(current_year = current_year),                             # stage = yearのように書いても可
+active_binding_field = list(avg_weight = avg_weight),  # ctive_binding_field = avg_weightのように書いても可
+global_FUN = list(time_passes = time_passes)           # global_FUN = time_passesのように書いても可
+)
+current_year <- 1990
+time_passes <- function(){G$current_year <- G$current_year + 1}
+setABM(agents = agents,
+stage = list(current_year = current_year),                             # stage = yearのように書いても可
+active_binding_field = list(avg_weight = avg_weight),  # ctive_binding_field = avg_weightのように書いても可
+global_FUN = list(time_passes = time_passes)           # global_FUN = time_passesのように書いても可
+)
+G <- setABM(agents = agents,
+stage = list(current_year = current_year),                             # stage = yearのように書いても可
+active_binding_field = list(avg_weight = avg_weight),  # ctive_binding_field = avg_weightのように書いても可
+global_FUN = list(time_passes = time_passes)           # global_FUN = time_passesのように書いても可
+)
+G
+set.seed(seed = 1)
+G <- runABM(G, schedule = c("time_passes", "gain_weight", "get_taller"), times = 10)
+G$agents$ID2$gain_weight()
+gain_weight1 <- function(){self$weight <- self$weight + 1} #1番目のエージェントの行為ルール
+gain_weight2 <- function(){
+decision <- sample(c(1,0), size = 1) # 0か1かをランダムに選ぶ
+if(decision==1){　　　　　　　　　　   # decision=1の場合には体重が１増える
+self$weight <- self$weight + 1
+}else{　　　　　　　　　　　　　　　　  # decision=0の場合には体重が１減る
+self$weight <- self$weight - 1
+}
+}
+agents <- init_agent(attr_df = agent_attribute,
+act_FUN = list(get_taller = get_taller,
+gain_weight = list(gain_weight1, gain_weight2)),
+active_binding_field = BMI)
+set.seed(seed = 1)
+G <- runABM(G, schedule = c("time_passes", "gain_weight", "get_taller"), times = 10)
+G$agents$ID2$gain_weight()
+agents <- init_agent(attr_df = agent_attribute,
+act_FUN = list(get_taller = get_taller,
+gain_weight = list(gain_weight1, gain_weight2)),
+active_binding_field = BMI)
+agents$ID2$gain_weight()
+G <- setABM(agents = agents,
+stage = list(current_year = current_year),                             # stage = yearのように書いても可
+active_binding_field = list(avg_weight = avg_weight),  # ctive_binding_field = avg_weightのように書いても可
+global_FUN = list(time_passes = time_passes)           # global_FUN = time_passesのように書いても可
+)
+set.seed(seed = 1)
+G <- runABM(G, schedule = c("time_passes", "gain_weight", "get_taller"), times = 10)
+G <- setABM(agents = agents,
+stage = list(current_year = current_year),                             # stage = yearのように書いても可
+active_binding_field = list(avg_weight = avg_weight),  # ctive_binding_field = avg_weightのように書いても可
+global_FUN = list(time_passes = time_passes)           # global_FUN = time_passesのように書いても可
+)
+set.seed(seed = 1)
+G <- runABM(G, schedule = c("time_passes", "gain_weight", "get_taller"), times = 10)
+G$avg_weight
+G <- setABM(agents = agents,
+stage = list(current_year = current_year),                             # stage = yearのように書いても可
+active_binding_field = list(avg_weight = avg_weight),  # ctive_binding_field = avg_weightのように書いても可
+global_FUN = list(time_passes = time_passes)           # global_FUN = time_passesのように書いても可
+)
+set.seed(seed = 1)
+G <- runABM(G, schedule = c("time_passes", "gain_weight", "get_taller"), times = 10)
+G$avg_weight
+G$avg_weight

@@ -463,7 +463,14 @@ ABM_G <- R6::R6Class("ABM_G", lock_objects = FALSE, cloneable = TRUE,
                              field <- private$field_category
                              field_agent <- names(field[field=="agent"])
                              field_other <- c(names(field[field=="stage"]), "time")
-                             G_values <- lapply(field_other, function(X){self[[X]]})
+                             G_values <- lapply(field_other, function(X){
+                               X_retrieved <- self[[X]]
+                               if(any(class(X_retrieved) == "data.table")){
+                                 data.table::as.data.table(as.data.frame(X_retrieved))
+                               }else{
+                                 X_retrieved
+                               }
+                               })
                              names(G_values) <- field_other
                              # agentの値を取得する
                              G_agent <- lapply(field_agent, function(field_agent_p){

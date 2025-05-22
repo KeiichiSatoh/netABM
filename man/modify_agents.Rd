@@ -18,7 +18,7 @@ modify_agents(
 )
 }
 \description{
-Modifying a set of ABM_Agent class objects
+This function modifies ABM_Agent class objects
 }
 \details{
 "rename"や"remove"を行う場合には、注意が必要。もしもこれらのフィールドを、

@@ -74,6 +74,7 @@
 #' @seealso [runABM], [init_agent], [ABM_G]
 #' @author Keiichi Satoh
 #' @import R6
+#' @import data.table
 #' @export
 #' @examples
 #' G <- setABM(agents = 3, stage = matrix(0, 3, 3))
