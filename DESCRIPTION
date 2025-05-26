@@ -25,7 +25,6 @@ Imports:
     dplyr,
     dqrng,
     Rcpp,
-    animation,
     data.table
 Depends: 
     R (>= 2.10)
