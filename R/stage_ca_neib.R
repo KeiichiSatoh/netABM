@@ -59,12 +59,12 @@ stage_ca_neib <- function(stage = NULL,
            }else{
              R <- stage_array[,,1] <- cbind(stage[ ,-1], NA)            # 右
              L <- stage_array[,,2] <- cbind(NA, stage[ ,-stage_dim[2]]) # 左
-             stage_array[,,3] <- rbind(NA, stage[-stage_dim[1], ])　　　# 上
-             stage_array[,,4] <- rbind(stage[-1, ], NA)　　　　　　　　 # 下
-             stage_array[,,5] <- rbind(NA, R[-stage_dim[1], ])　　　　　# 右上
-             stage_array[,,6] <- rbind(R[-1, ], NA)　    　　　　　　　 # 右下
-             stage_array[,,7] <- rbind(NA, L[-stage_dim[1], ])　　　# 左上
-             stage_array[,,8] <- rbind(NA, L[-1, ])　　　# 左下
+             stage_array[,,3] <- rbind(NA, stage[-stage_dim[1], ])   # 上
+             stage_array[,,4] <- rbind(stage[-1, ], NA)         # 下
+             stage_array[,,5] <- rbind(NA, R[-stage_dim[1], ])     # 右上
+             stage_array[,,6] <- rbind(R[-1, ], NA)             # 右下
+             stage_array[,,7] <- rbind(NA, L[-stage_dim[1], ])   # 左上
+             stage_array[,,8] <- rbind(NA, L[-1, ])   # 左下
            }
            # ベクトル化
            neib_vec <- matrix(as.vector(stage_array), nrow = prod(stage_dim))
