@@ -44,8 +44,8 @@ agents <- init_agent(n = 2, attr_df = agent_attr, act_FUN = f)
 G <- setABM(agents = agents)
 pararun(X = 1:3, expr = runABM(G = G, schedule = "f"), ncores = 2)
 pararun(X = 1:3,
-        expr = {
-          G_res <- runABM(G = G)
-          G_res$agents$ID1
-        }, ncores = 2)
+    expr = {
+     G_res <- runABM(G = G)
+     G_res$agents$ID1
+    }, ncores = 2)
 }
