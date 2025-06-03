@@ -198,7 +198,7 @@ ABM_G <- R6::R6Class("ABM_G", lock_objects = FALSE, cloneable = TRUE,
                              }
                              # field_categoryも削除
                              index <- which(names(private$field_category)==name)
-                            　private$field_category <- private$field_category[-index]
+                             private$field_category <- private$field_category[-index]
                            },
 
                            #' @description
