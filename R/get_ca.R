@@ -96,6 +96,6 @@ get_ca <- function(which_ca = NULL, by_which_attr = NULL, D = NULL, from_log = F
    }
    names(CA2) <- names(D$log)
  } # logから：ここまで
-　# リターン
- CA2
+ # リターン
+CA2
 }
